@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Target, TrendingUp, MessageSquare, Gamepad2, CheckCircle2, DollarSign, Compass, CalendarDays } from 'lucide-react';
+import { Target, TrendingUp, MessageSquare, Gamepad2, CheckCircle2, DollarSign, Compass, CalendarDays, Users } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { getTodayDateStr } from '@/lib/wordOfDay';
 import { getApprovedSupporters } from '@/lib/supporters';
@@ -36,6 +36,12 @@ const Metric = ({ icon: Icon, label, value, color }) => (
   </div>
 );
 
+function getLast7DaysStart() {
+  const d = new Date();
+  d.setDate(d.getDate() - 6);
+  return d.toISOString().slice(0, 10);
+}
+
 /** Retorna a segunda-feira da semana atual em YYYY-MM-DD (Brasília). */
 function getWeekStart() {
   const now = new Date();
@@ -51,6 +57,7 @@ const GoalSection = () => {
   const [weekly, setWeekly] = useState(null);
   const [focus, setFocus] = useState(null);
   const [supporters, setSupporters] = useState([]);
+  const [players7d, setPlayers7d] = useState(null);
 
   useEffect(() => {
     if (!supabase) return;
@@ -84,6 +91,14 @@ const GoalSection = () => {
       if (wf?.data) setFocus(wf.data);
     }).catch(() => {});
     getApprovedSupporters(50).then(setSupporters);
+
+    const last7Start = getLast7DaysStart();
+    Promise.all([
+      supabase.from('daily_results').select('id', { count: 'exact', head: true }).gte('created_at', last7Start),
+      supabase.from('daily_results_6').select('id', { count: 'exact', head: true }).gte('created_at', last7Start),
+    ]).then(([p5, p6]) => {
+      setPlayers7d((p5.count || 0) + (p6.count || 0));
+    }).catch(() => setPlayers7d(0));
   }, []);
 
   const today = getTodayDateStr();
@@ -202,6 +217,27 @@ const GoalSection = () => {
                 {weekly.completed > 0 && (
                   <><span className="font-bold">{weekly.completed}</span> {weekly.completed === 1 ? 'atualização entregue' : 'atualizações entregues'}</>
                 )}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Jogadores ativos — últimos 7 dias */}
+        {players7d !== null && (
+          <div
+            className="mt-4 rounded-lg p-3 border flex items-start gap-3"
+            style={{ backgroundColor: SURF, borderColor: BDR }}
+          >
+            <div className="w-7 h-7 rounded-lg bg-[#6aaa64]/10 flex items-center justify-center shrink-0">
+              <Users className="w-4 h-4 text-[#6aaa64]" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-[#6aaa64]/80 mb-1">
+                Últimos 7 dias
+              </p>
+              <p className="text-white text-sm leading-snug">
+                <span className="font-bold">{players7d.toLocaleString('pt-BR')}</span>{' '}
+                {players7d === 1 ? 'pessoa jogou' : 'pessoas jogaram'}
               </p>
             </div>
           </div>
