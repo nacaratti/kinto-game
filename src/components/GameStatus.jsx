@@ -218,7 +218,8 @@ const GameStatus = ({
     const modeLabel = currentMode.id === 'classic' ? '' : ` (${currentMode.label})`;
     const hardSuffix = hardMode ? ' *' : '';
     const streakSuffix = streak >= 2 ? ` 🔥${streak}` : '';
-    return `Kinto${modeLabel}${hardSuffix} ${today} ${result}${streakSuffix}\n\n${rows}\n\nhttps://kinto.fun`;
+    const gameUrl = `https://kinto.fun${currentMode.path === '/' ? '' : currentMode.path}`;
+    return `Kinto${modeLabel}${hardSuffix} ${today} ${result}${streakSuffix}\n\n${rows}\n\n${gameUrl}`;
   };
 
   const handleShare = async () => {
