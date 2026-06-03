@@ -4,7 +4,7 @@ import { Share2, Clock, X, ChevronRight, MessageSquare, Flame, Coffee } from 'lu
 import { getDailyResults } from '@/lib/stats';
 import { getDailyResults6 } from '@/lib/stats6';
 import { getTodayDateStr } from '@/lib/wordOfDay';
-import { getStreak, getBestStreak } from '@/lib/streak';
+import { getStreak, getBestStreak, getPersonalHistory, DAILY_KEY_5, DAILY_KEY_6 } from '@/lib/streak';
 import { GAME_MODES } from '@/config/gameModes';
 import { MAX_GUESSES } from '@/config/constants';
 import { submitComment, hasSubmittedComment } from '@/lib/comments';
@@ -189,6 +189,7 @@ const GameStatus = ({
   const [todayResults, setTodayResults] = useState([]);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
+  const [personalHistory, setPersonalHistory] = useState([]);
 
   const countdown = useCountdown();
   const today = getTodayDateStr();
@@ -204,6 +205,8 @@ const GameStatus = ({
     const current = getStreak();
     setStreak(current);
     setBestStreak(prevBest);
+    const modeKey = currentMode.id === 'classic' ? DAILY_KEY_5 : DAILY_KEY_6;
+    setPersonalHistory(getPersonalHistory(30, modeKey));
   }, [isOpen, today]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const buildShareText = () => {
@@ -401,6 +404,42 @@ const GameStatus = ({
                       </div>
                     </div>
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* Personal history grid */}
+            {personalHistory.some(h => h.status !== null) && (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-zinc-600 mb-2 text-center">
+                  Seus últimos 30 dias
+                </p>
+                <div className="grid grid-cols-10 gap-1">
+                  {personalHistory.map(({ date, status }) => (
+                    <div
+                      key={date}
+                      title={date}
+                      className={`aspect-square rounded-sm ${
+                        status === 'won'
+                          ? 'theme-bg-correct'
+                          : status === 'lost'
+                          ? 'bg-red-900/50'
+                          : 'bg-zinc-800/70'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <div className="flex items-center justify-center gap-4 mt-2">
+                  {[
+                    { cls: 'theme-bg-correct', label: 'Acertou' },
+                    { cls: 'bg-red-900/50', label: 'Errou' },
+                    { cls: 'bg-zinc-800/70', label: 'Não jogou' },
+                  ].map(({ cls, label }) => (
+                    <span key={label} className="flex items-center gap-1 text-[10px] text-zinc-600">
+                      <span className={`w-2.5 h-2.5 rounded-sm shrink-0 ${cls}`} />
+                      {label}
+                    </span>
+                  ))}
                 </div>
               </div>
             )}

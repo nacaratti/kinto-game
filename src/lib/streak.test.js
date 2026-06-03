@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 let getStreak;
 let getBestStreak;
+let getPersonalHistory;
 
 const encode = (obj) => btoa(JSON.stringify(obj));
 
@@ -16,6 +17,7 @@ beforeEach(async () => {
   const mod = await import('./streak.js');
   getStreak = mod.getStreak;
   getBestStreak = mod.getBestStreak;
+  getPersonalHistory = mod.getPersonalHistory;
 });
 
 describe('getStreak', () => {
@@ -142,6 +144,69 @@ describe('getStreak — fevereiro sem bissexto', () => {
       '2026-02-28|FEVRO': [{ won: true, attempts: 2 }],
     }));
     expect(getStreakFev28()).toBe(2);
+  });
+});
+
+describe('getPersonalHistory', () => {
+  it('retorna 30 entradas', () => {
+    const h = getPersonalHistory(30, '_s2z');
+    expect(h).toHaveLength(30);
+  });
+
+  it('ultima entrada e hoje (2026-05-18)', () => {
+    const h = getPersonalHistory(30, '_s2z');
+    expect(h[h.length - 1].date).toBe('2026-05-18');
+  });
+
+  it('primeira entrada e 29 dias atras', () => {
+    const h = getPersonalHistory(30, '_s2z');
+    expect(h[0].date).toBe('2026-04-19');
+  });
+
+  it('marca dia jogado e ganho como won', () => {
+    localStorage.setItem('_s2z', encode({
+      '2026-05-18|TESTE': [{ won: true, attempts: 3 }],
+    }));
+    const h = getPersonalHistory(30, '_s2z');
+    const today = h.find(e => e.date === '2026-05-18');
+    expect(today.status).toBe('won');
+  });
+
+  it('marca dia jogado e perdido como lost', () => {
+    localStorage.setItem('_s2z', encode({
+      '2026-05-18|TESTE': [{ won: false, attempts: 6 }],
+    }));
+    const h = getPersonalHistory(30, '_s2z');
+    const today = h.find(e => e.date === '2026-05-18');
+    expect(today.status).toBe('lost');
+  });
+
+  it('dia nao jogado retorna null', () => {
+    localStorage.setItem('_s2z', encode({
+      '2026-05-17|TESTE': [{ won: true, attempts: 3 }],
+    }));
+    const h = getPersonalHistory(30, '_s2z');
+    const today = h.find(e => e.date === '2026-05-18');
+    expect(today.status).toBeNull();
+  });
+
+  it('won prevalece sobre lost no mesmo dia', () => {
+    localStorage.setItem('_s2z', encode({
+      '2026-05-18|PALAVRA1': [{ won: false, attempts: 6 }],
+      '2026-05-18|PALAVRA2': [{ won: true, attempts: 4 }],
+    }));
+    const h = getPersonalHistory(30, '_s2z');
+    const today = h.find(e => e.date === '2026-05-18');
+    expect(today.status).toBe('won');
+  });
+
+  it('usa chave correta para modo 6 letras', () => {
+    localStorage.setItem('_s2z6', encode({
+      '2026-05-18|ABCDEF': [{ won: true, attempts: 5 }],
+    }));
+    const h = getPersonalHistory(30, '_s2z6');
+    const today = h.find(e => e.date === '2026-05-18');
+    expect(today.status).toBe('won');
   });
 });
 
