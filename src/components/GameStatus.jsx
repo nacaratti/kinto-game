@@ -5,6 +5,7 @@ import { getDailyResults } from '@/lib/stats';
 import { getDailyResults6 } from '@/lib/stats6';
 import { getTodayDateStr } from '@/lib/wordOfDay';
 import { getStreak, getBestStreak, getPersonalHistory, DAILY_KEY_5, DAILY_KEY_6 } from '@/lib/streak';
+import { buildShareText } from '@/lib/shareText';
 import { GAME_MODES } from '@/config/gameModes';
 import { MAX_GUESSES } from '@/config/constants';
 import { submitComment, hasSubmittedComment } from '@/lib/comments';
@@ -209,24 +210,11 @@ const GameStatus = ({
     setPersonalHistory(getPersonalHistory(30, modeKey));
   }, [isOpen, today]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const buildShareText = () => {
-    const attempt = isGameWon ? currentAttempt + 1 : maxGuesses;
-    const result = isGameWon ? `${attempt}/${maxGuesses}` : `X/${maxGuesses}`;
-    const rows = (submittedGuessesInfo || [])
-      .filter(Boolean)
-      .map(row => row.map(({ status }) =>
-        status === 'correct' ? '🟢' : status === 'present' ? '🟡' : '⚫'
-      ).join(''))
-      .join('\n');
-    const modeLabel = currentMode.id === 'classic' ? '' : ` (${currentMode.label})`;
-    const hardSuffix = hardMode ? ' *' : '';
-    const streakSuffix = streak >= 2 ? ` 🔥${streak}` : '';
-    const gameUrl = `https://kinto.fun${currentMode.path === '/' ? '' : currentMode.path}`;
-    return `Kinto${modeLabel}${hardSuffix} ${today} ${result}${streakSuffix}\n\n${rows}\n\n${gameUrl}`;
-  };
+  const buildShareTextLocal = () =>
+    buildShareText({ isGameWon, currentAttempt, maxGuesses, submittedGuessesInfo, currentMode, hardMode, today, streak });
 
   const handleShare = async () => {
-    const text = buildShareText();
+    const text = buildShareTextLocal();
     if (navigator.share) {
       try {
         await navigator.share({ text });
