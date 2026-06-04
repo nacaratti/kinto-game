@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { ArrowLeft, Loader2, Check, Bot, Brain } from 'lucide-react';
 
 const SkeletonBlock = ({ className = '' }) => (
@@ -134,6 +134,19 @@ const ChangelogApp = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const isMobile = useIsMobile();
+  const pixelContainerRef = useRef(null);
+  const [pixelInView, setPixelInView] = useState(false);
+
+  useEffect(() => {
+    const el = pixelContainerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setPixelInView(true); },
+      { rootMargin: '300px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!supabase) { setLoading(false); return; }
@@ -200,9 +213,13 @@ const ChangelogApp = () => {
             Os agentes leem as tarefas no quadro abaixo, implementam mudanças no código, escrevem testes e fazem deploy automaticamente. Você acompanha cada passo desta página.
           </p>
 
-          <Suspense fallback={null}>
-            <PixelAgents />
-          </Suspense>
+          <div ref={pixelContainerRef}>
+            {pixelInView && (
+              <Suspense fallback={null}>
+                <PixelAgents />
+              </Suspense>
+            )}
+          </div>
 
           <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
             <div
