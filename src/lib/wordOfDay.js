@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import rawSolucoes from '../../palavras/solucoes.txt?raw';
+import { getSeasonalWordList } from '@/lib/seasonalTheme';
 
 // Brasília = UTC-3 (sem horário de verão desde 2019)
 const BRASILIA_OFFSET_MS = -3 * 60 * 60 * 1000;
@@ -75,7 +76,8 @@ export const initWordOfDay = async () => {
         return word;
       }
 
-      const autoWord = computeDefaultWord(today);
+      const seasonal = getSeasonalWordList();
+      const autoWord = computeDefaultWord(today, seasonal || undefined);
 
       await supabase
         .from('daily_words')
@@ -88,7 +90,8 @@ export const initWordOfDay = async () => {
     }
   }
 
-  const fallback = computeDefaultWord(today);
+  const seasonal = getSeasonalWordList();
+  const fallback = computeDefaultWord(today, seasonal || undefined);
   writeCache(today, fallback);
   return fallback;
 };
