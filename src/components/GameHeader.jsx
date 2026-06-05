@@ -86,9 +86,16 @@ const InstructionsModal = ({ onClose, currentMode }) => (
         </div>
       </div>
 
-      <p className="text-xs text-zinc-600 text-center">
+      <p className="text-xs text-zinc-600 text-center mb-5">
         Uma nova palavra todos os dias. <span className="text-white font-semibold">Uma tentativa por dia</span> — use bem!
       </p>
+
+      <button
+        onClick={onClose}
+        className="w-full bg-white hover:bg-zinc-100 text-black font-bold py-3 rounded-xl transition-colors text-sm"
+      >
+        Jogar
+      </button>
     </motion.div>
   </motion.div>
 );
