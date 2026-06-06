@@ -10,6 +10,7 @@ import { getModeByPath } from '@/config/gameModes';
 import { useTheme } from '@/hooks/useTheme';
 import { getStreak } from '@/lib/streak';
 import Confetti from '@/components/Confetti';
+import Bandeirinhas from '@/components/Bandeirinhas';
 import { useHardMode } from '@/hooks/useHardMode';
 import { isJuneBrasilia } from '@/lib/seasonalTheme';
 
@@ -106,6 +107,7 @@ const App = ({ initialMode, allModes }) => {
       onClick={() => mainRef.current?.focus()}
     >
       <Toaster />
+      <Bandeirinhas />
       {showConfetti && <Confetti onDone={() => setShowConfetti(false)} />}
       <GameHeader
         allModes={allModes}

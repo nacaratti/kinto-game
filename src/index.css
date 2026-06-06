@@ -223,6 +223,42 @@
 }
 .row-shake { animation: rowShake 0.5s ease-in-out; }
 
+/* ─── Bandeirinhas de festa junina ───────────────────────────────────────────── */
+.bandeirinhas {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  height: 22px;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  /* a "cordinha" de onde penduram as bandeirinhas */
+  border-top: 2px solid rgba(255, 255, 255, 0.25);
+  background: transparent;
+}
+
+.bandeirinha {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  background: var(--cor);
+  /* triângulo apontando para baixo */
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: top center;
+  animation: bandeiraSway 3s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -0.5s);
+}
+
+@keyframes bandeiraSway {
+  0%, 100% { transform: rotate(-3deg); }
+  50%      { transform: rotate(3deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bandeirinha { animation: none; }
+}
+
 /* ─── Utilitários temáticos ──────────────────────────────────────────────────── */
 .theme-text-present  { color: var(--color-present); }
 .theme-text-correct  { color: var(--color-correct); }
