@@ -9,7 +9,7 @@ const CORES = ['#e23b2e', '#f4c020', '#3aa64a', '#2a7de1'];
 // "cai" no meio (catenária aproximada). Cada bandeirinha é pendurada
 // num ponto da curva e inclinada conforme a tangente — como se
 // estivesse de fato amarrada à corda.
-export function buildBunting({ count = 16, width = 1000, top = 12, sag = 70 }) {
+export function buildBunting({ count = 22, width = 1200, top = 10, sag = 40 }) {
   const P0 = { x: 12, y: top };
   const P1 = { x: width / 2, y: top + sag }; // ponto de controle (puxa pra baixo)
   const P2 = { x: width - 12, y: top };
@@ -40,9 +40,9 @@ export function buildBunting({ count = 16, width = 1000, top = 12, sag = 70 }) {
 }
 
 // Flâmula tipo "rabo de andorinha" pendurada do ponto (0,0).
-const FLAG_W = 42;
-const FLAG_H = 46;
-const NOTCH = 13;
+const FLAG_W = 36;
+const FLAG_H = 34;
+const NOTCH = 10;
 const FLAG_POINTS = [
   [-FLAG_W / 2, 0],
   [FLAG_W / 2, 0],
@@ -54,11 +54,11 @@ const FLAG_POINTS = [
 // Festão decorativo de bandeirinhas de festa junina. Puramente visual:
 // pointer-events none, user-select none e aria-hidden, então nunca
 // atrapalha a jogabilidade. Estático (sem animação). Só em junho.
-const Bandeirinhas = ({ count = 16 }) => {
+const Bandeirinhas = ({ count = 22 }) => {
   if (!isJuneBrasilia()) return null;
 
-  const VIEW_W = 1000;
-  const VIEW_H = 150;
+  const VIEW_W = 1200;
+  const VIEW_H = 90;
   const { cordPath, flags } = buildBunting({ count, width: VIEW_W });
 
   return (
@@ -66,8 +66,8 @@ const Bandeirinhas = ({ count = 16 }) => {
       <svg
         viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
         width="100%"
-        height="100%"
-        preserveAspectRatio="none"
+        height="auto"
+        preserveAspectRatio="xMidYMid meet"
         className="bandeirinhas-svg"
       >
         {/* corda */}

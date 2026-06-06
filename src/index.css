@@ -226,15 +226,18 @@
 /* ─── Bandeirinhas de festa junina (festão SVG, estático) ─────────────────────── */
 .bandeirinhas {
   width: 100%;
-  height: 60px;
-  overflow: hidden;
   pointer-events: none;
   user-select: none;
   line-height: 0;
+  /* limite de altura em telas largas para o festão não ficar gigante */
+  max-height: 120px;
+  overflow: hidden;
 }
 
 .bandeirinhas-svg {
   display: block;
+  width: 100%;
+  height: auto;
 }
 
 /* ─── Utilitários temáticos ──────────────────────────────────────────────────── */
