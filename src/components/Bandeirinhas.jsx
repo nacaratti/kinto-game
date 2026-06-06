@@ -5,14 +5,15 @@ import { isJuneBrasilia } from '@/lib/seasonalTheme';
 // verde, azul), alternadas como na referência.
 const CORES = ['#e23b2e', '#f4c020', '#3aa64a', '#2a7de1'];
 
-// Geometria do festão: a corda é uma curva de Bézier quadrática que
-// "cai" no meio (catenária aproximada). Cada bandeirinha é pendurada
-// num ponto da curva e inclinada conforme a tangente — como se
-// estivesse de fato amarrada à corda.
-export function buildBunting({ count = 22, width = 1200, top = 10, sag = 40 }) {
-  const P0 = { x: 12, y: top };
-  const P1 = { x: width / 2, y: top + sag }; // ponto de controle (puxa pra baixo)
-  const P2 = { x: width - 12, y: top };
+// Geometria de um "drapeado" (uma barriga da corda): a corda é uma
+// curva de Bézier quadrática que cai no meio e volta, de modo que o
+// padrão possa ser repetido lado a lado (tile) sem emendas visíveis.
+// Cada bandeirinha é pendurada num ponto da curva e inclinada conforme
+// a tangente — como se estivesse amarrada à corda.
+export function buildBunting({ count = 8, width = 320, top = 8, sag = 56 }) {
+  const P0 = { x: 0, y: top };
+  const P1 = { x: width / 2, y: top + sag };
+  const P2 = { x: width, y: top };
 
   const at = (t) => {
     const mt = 1 - t;
@@ -28,7 +29,6 @@ export function buildBunting({ count = 22, width = 1200, top = 10, sag = 40 }) {
   };
 
   const flags = [];
-  // distribui as bandeirinhas entre as extremidades, com margem nas pontas
   for (let i = 0; i < count; i++) {
     const t = (i + 0.5) / count;
     const p = at(t);
@@ -40,9 +40,9 @@ export function buildBunting({ count = 22, width = 1200, top = 10, sag = 40 }) {
 }
 
 // Flâmula tipo "rabo de andorinha" pendurada do ponto (0,0).
-const FLAG_W = 36;
-const FLAG_H = 34;
-const NOTCH = 10;
+const FLAG_W = 30;
+const FLAG_H = 30;
+const NOTCH = 9;
 const FLAG_POINTS = [
   [-FLAG_W / 2, 0],
   [FLAG_W / 2, 0],
@@ -51,46 +51,58 @@ const FLAG_POINTS = [
   [-FLAG_W / 2, FLAG_H],
 ].map((p) => p.join(',')).join(' ');
 
+const TILE_W = 320;
+const TILE_H = 74;
+
+// Monta o SVG de um único drapeado como string, para ser usado como
+// background-image que se repete horizontalmente (repeat-x). Assim o
+// festão preenche qualquer largura mantendo tamanho e curva constantes.
+function buildTileSvg() {
+  const { cordPath, flags } = buildBunting({ count: 8, width: TILE_W });
+  const flagsMarkup = flags
+    .map(
+      (f) =>
+        `<g transform="translate(${f.x.toFixed(1)} ${f.y.toFixed(1)}) rotate(${f.angle.toFixed(1)})">` +
+        `<circle cx="0" cy="0" r="2" fill="rgba(255,255,255,0.5)"/>` +
+        `<polygon points="${FLAG_POINTS}" fill="${f.color}"/>` +
+        `<polygon points="${FLAG_POINTS}" fill="url(#s)"/>` +
+        `</g>`
+    )
+    .join('');
+
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${TILE_W}" height="${TILE_H}" viewBox="0 0 ${TILE_W} ${TILE_H}">` +
+    `<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1">` +
+    `<stop offset="0%" stop-color="rgba(255,255,255,0.18)"/>` +
+    `<stop offset="55%" stop-color="rgba(0,0,0,0)"/>` +
+    `<stop offset="100%" stop-color="rgba(0,0,0,0.22)"/>` +
+    `</linearGradient></defs>` +
+    `<path d="${cordPath}" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2" stroke-linecap="round"/>` +
+    flagsMarkup +
+    `</svg>`
+  );
+}
+
+const TILE_DATA_URI = `url("data:image/svg+xml,${encodeURIComponent(buildTileSvg())}")`;
+
 // Festão decorativo de bandeirinhas de festa junina. Puramente visual:
 // pointer-events none, user-select none e aria-hidden, então nunca
 // atrapalha a jogabilidade. Estático (sem animação). Só em junho.
-const Bandeirinhas = ({ count = 22 }) => {
+const Bandeirinhas = () => {
   if (!isJuneBrasilia()) return null;
 
-  const VIEW_W = 1200;
-  const VIEW_H = 90;
-  const { cordPath, flags } = buildBunting({ count, width: VIEW_W });
-
   return (
-    <div className="bandeirinhas" aria-hidden="true">
-      <svg
-        viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
-        width="100%"
-        height="auto"
-        preserveAspectRatio="xMidYMid meet"
-        className="bandeirinhas-svg"
-      >
-        {/* corda */}
-        <path d={cordPath} fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2.5" strokeLinecap="round" />
-        {/* bandeirinhas */}
-        {flags.map((f, i) => (
-          <g key={i} transform={`translate(${f.x} ${f.y}) rotate(${f.angle})`}>
-            {/* nó na corda */}
-            <circle cx="0" cy="0" r="2.2" fill="rgba(255,255,255,0.5)" />
-            <polygon points={FLAG_POINTS} fill={f.color} />
-            {/* leve sombra na parte de baixo para dar volume de tecido */}
-            <polygon points={FLAG_POINTS} fill="url(#bandeiraSombra)" />
-          </g>
-        ))}
-        <defs>
-          <linearGradient id="bandeiraSombra" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.18)" />
-            <stop offset="55%" stopColor="rgba(0,0,0,0)" />
-            <stop offset="100%" stopColor="rgba(0,0,0,0.22)" />
-          </linearGradient>
-        </defs>
-      </svg>
-    </div>
+    <div
+      className="bandeirinhas"
+      aria-hidden="true"
+      style={{
+        height: `${TILE_H}px`,
+        backgroundImage: TILE_DATA_URI,
+        backgroundRepeat: 'repeat-x',
+        backgroundPosition: 'center top',
+        backgroundSize: `${TILE_W}px ${TILE_H}px`,
+      }}
+    />
   );
 };
 
