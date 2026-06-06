@@ -12,7 +12,6 @@ import { getStreak } from '@/lib/streak';
 import Confetti from '@/components/Confetti';
 import Bandeirinhas from '@/components/Bandeirinhas';
 import { useHardMode } from '@/hooks/useHardMode';
-import { isJuneBrasilia } from '@/lib/seasonalTheme';
 
 const App = ({ initialMode, allModes }) => {
   const { theme, setTheme, themes } = useTheme();
@@ -107,7 +106,6 @@ const App = ({ initialMode, allModes }) => {
       onClick={() => mainRef.current?.focus()}
     >
       <Toaster />
-      <Bandeirinhas />
       {showConfetti && <Confetti onDone={() => setShowConfetti(false)} />}
       <GameHeader
         allModes={allModes}
@@ -121,14 +119,7 @@ const App = ({ initialMode, allModes }) => {
         streak={streak}
       />
 
-      {isJuneBrasilia() && (
-        <div
-          className="w-full py-1.5 text-center text-xs font-semibold tracking-wide select-none"
-          style={{ background: 'linear-gradient(90deg, #7c3800, #a85200, #7c3800)', color: '#fcd34d' }}
-        >
-          🎪 Kinto · Edição Festa Junina · Junho 2026
-        </div>
-      )}
+      <Bandeirinhas />
 
       <main className="flex flex-col items-center justify-between flex-1 w-full max-w-lg mx-auto px-3 pt-3 pb-2">
         <GameBoard
