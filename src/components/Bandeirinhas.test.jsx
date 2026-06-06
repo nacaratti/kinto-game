@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { renderToStaticMarkup } from 'react-dom/server';
+import React from 'react';
 
 let Bandeirinhas;
-let buildBunting;
+let buildGarland;
 let setJune;
 
 beforeEach(async () => {
@@ -13,55 +15,72 @@ beforeEach(async () => {
   }));
   const mod = await import('./Bandeirinhas.jsx');
   Bandeirinhas = mod.default;
-  buildBunting = mod.buildBunting;
+  buildGarland = mod.buildGarland;
 });
 
 describe('Bandeirinhas (componente)', () => {
   it('não renderiza nada fora de junho', () => {
     setJune(false);
-    expect(Bandeirinhas({})).toBeNull();
+    expect(renderToStaticMarkup(React.createElement(Bandeirinhas))).toBe('');
   });
 
-  it('renderiza a faixa em junho', () => {
+  it('renderiza o festão em junho (svg + bandeirinhas + aria-hidden)', () => {
     setJune(true);
-    const el = Bandeirinhas({});
-    expect(el).not.toBeNull();
-    expect(el.props.className).toBe('bandeirinhas');
-    expect(el.props['aria-hidden']).toBe('true');
+    const html = renderToStaticMarkup(React.createElement(Bandeirinhas));
+    expect(html).toContain('class="bandeirinhas"');
+    expect(html).toContain('aria-hidden="true"');
+    expect(html).toContain('<svg');
+    expect(html).toContain('<polygon');
   });
 
-  it('é decorativa: não captura cliques (sem onClick)', () => {
+  it('é decorativo: não captura cliques (sem onclick)', () => {
     setJune(true);
-    const el = Bandeirinhas({});
-    expect(el.props.onClick).toBeUndefined();
+    const html = renderToStaticMarkup(React.createElement(Bandeirinhas));
+    expect(html.toLowerCase()).not.toContain('onclick');
   });
 });
 
-describe('buildBunting (geometria do festão)', () => {
-  it('gera a quantidade de bandeirinhas pedida', () => {
-    const { flags } = buildBunting({ count: 12, width: 1000 });
-    expect(flags).toHaveLength(12);
+describe('buildGarland (geometria do festão)', () => {
+  it('gera bandeirinhas e um path de corda', () => {
+    const g = buildGarland(1200);
+    expect(g.flags.length).toBeGreaterThan(0);
+    expect(g.cordPath.startsWith('M')).toBe(true);
   });
 
-  it('a corda cai no meio (catenária): centro mais baixo que as pontas', () => {
-    const { flags } = buildBunting({ count: 9, width: 1000, top: 12, sag: 70 });
-    const meio = flags[Math.floor(flags.length / 2)];
-    expect(meio.y).toBeGreaterThan(flags[0].y);
-    expect(meio.y).toBeGreaterThan(flags[flags.length - 1].y);
+  it('é simétrico em torno do centro', () => {
+    const g = buildGarland(1600);
+    const half = 800;
+    const left = g.flags.find((f) => Math.abs(f.x - (half - 300)) < 16);
+    const right = g.flags.find((f) => Math.abs(f.x - (half + 300)) < 16);
+    expect(left && right).toBeTruthy();
+    expect(Math.abs(left.y - right.y)).toBeLessThan(2);
   });
 
-  it('é simétrica: pontas inclinam para lados opostos, centro reto', () => {
-    const { flags } = buildBunting({ count: 9, width: 1000 });
-    const primeira = flags[0];
-    const ultima = flags[flags.length - 1];
-    // tangentes opostas nas pontas
-    expect(Math.sign(primeira.angle)).toBe(-Math.sign(ultima.angle));
-    // bandeirinha central praticamente sem inclinação
-    expect(Math.abs(flags[Math.floor(flags.length / 2)].angle)).toBeLessThan(1);
+  it('no web: laterais descem bem mais que o centro', () => {
+    const g = buildGarland(1600);
+    const half = 800;
+    const centro = g.flags.find((f) => Math.abs(f.x - half) < 16);
+    const borda = g.flags.reduce((a, b) => (b.x < a.x ? b : a)); // mais à esquerda
+    expect(borda.y).toBeGreaterThan(centro.y + 80);
   });
 
-  it('produz um path SVG de curva quadrática (Q)', () => {
-    const { cordPath } = buildBunting({ count: 4, width: 1000 });
-    expect(cordPath).toMatch(/^M .+ Q .+/);
+  it('zona central do jogo permanece rasa (independente da largura)', () => {
+    const wide = buildGarland(1600);
+    const narrow = buildGarland(520);
+    // profundidade do centro deve ser parecida (rasa) em ambos
+    const centroWide = wide.flags.find((f) => Math.abs(f.x - 800) < 16).y;
+    const centroNarrow = narrow.flags.find((f) => Math.abs(f.x - 260) < 16).y;
+    expect(Math.abs(centroWide - centroNarrow)).toBeLessThan(20);
+    // o fluxo ocupado (altura reservada) é raso em ambos
+    expect(wide.flowHeight).toBeLessThan(70);
+    expect(narrow.flowHeight).toBeLessThan(70);
+  });
+
+  it('no mobile (estreito) não há queda lateral', () => {
+    const g = buildGarland(400);
+    const ys = g.flags.map((f) => f.y);
+    const max = Math.max(...ys);
+    const min = Math.min(...ys);
+    expect(max - min).toBeLessThan(40); // raso e uniforme
   });
 });
