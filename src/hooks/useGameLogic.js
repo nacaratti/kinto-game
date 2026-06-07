@@ -5,7 +5,6 @@ import { WORD_LENGTH, MAX_GUESSES } from '@/config/constants';
 import { checkGuess as evaluateGuess } from '@/lib/gameLogic';
 import { validateHardModeGuess } from '@/hooks/useHardMode';
 import { initWordOfDay, getTodayDateStr } from '@/lib/wordOfDay';
-import { initWordOfDay6 } from '@/lib/wordOfDay6';
 import { saveGameResult, saveDailyResult } from '@/lib/stats';
 import { saveDailyResult6 } from '@/lib/stats6';
 import { saveGameProgress, saveCompletedGame, getSavedGame } from '@/lib/gameState';
@@ -14,7 +13,9 @@ import { trackEvent } from '@/lib/analytics';
 
 export const useGameLogic = (wordLength = WORD_LENGTH, maxGuesses = MAX_GUESSES, hardMode = false) => {
   const is6 = wordLength === 6;
-  const getWordFn       = is6 ? initWordOfDay6    : initWordOfDay;
+  const getWordFn       = is6
+    ? () => import('@/lib/wordOfDay6').then(m => m.initWordOfDay6())
+    : initWordOfDay;
   const saveProgressFn  = is6 ? saveGameProgress6 : saveGameProgress;
   const saveCompletedFn = is6 ? saveCompletedGame6 : saveCompletedGame;
   const getSavedFn      = is6 ? getSavedGame6     : getSavedGame;
