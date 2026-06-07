@@ -1,4 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import {
+  BarChart3, Clock, BookOpen, LayoutGrid, Activity,
+  MessageSquare, TrendingUp, Heart, CalendarDays,
+  LogOut, ArrowLeft,
+} from 'lucide-react';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { SOLUTION_WORDS } from '@/data/solutionList';
 import { VALID_WORDS_SET } from '@/data/wordList';
@@ -997,108 +1002,144 @@ const SupportersPanel = () => {
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 const tabs = [
-  { id: 'wod',     label: 'Palavra · 5',  short: '5 Letras'  },
-  { id: 'wod6',    label: 'Palavra · 6',  short: '6 Letras'  },
-  { id: 'stats',   label: 'Estatísticas', short: 'Stats'     },
-  { id: 'history', label: 'Histórico',    short: 'Histórico' },
-  { id: 'words',   label: 'Palavras',     short: 'Palavras'  },
-  { id: 'kanban',    label: 'Kanban',        short: 'Kanban'    },
-  { id: 'logs',      label: 'Atividade',    short: 'Atividade' },
-  { id: 'comments',  label: 'Comentários',  short: 'Coment.'   },
-  { id: 'usage',     label: 'Uso',          short: 'Uso'       },
-  { id: 'supporters', label: 'Apoiadores', short: 'Apoio'     },
+  { id: 'wod',        label: 'Palavra · 5',  short: '5 Letras',  Icon: CalendarDays  },
+  { id: 'wod6',       label: 'Palavra · 6',  short: '6 Letras',  Icon: CalendarDays  },
+  { id: 'stats',      label: 'Estatísticas', short: 'Stats',     Icon: BarChart3     },
+  { id: 'history',    label: 'Histórico',    short: 'Histórico', Icon: Clock         },
+  { id: 'words',      label: 'Palavras',     short: 'Palavras',  Icon: BookOpen      },
+  { id: 'kanban',     label: 'Kanban',       short: 'Kanban',    Icon: LayoutGrid    },
+  { id: 'logs',       label: 'Atividade',    short: 'Atividade', Icon: Activity      },
+  { id: 'comments',   label: 'Comentários',  short: 'Coment.',   Icon: MessageSquare },
+  { id: 'usage',      label: 'Uso',          short: 'Uso',       Icon: TrendingUp    },
+  { id: 'supporters', label: 'Apoiadores',   short: 'Apoio',     Icon: Heart         },
 ];
 
 const Dashboard = ({ onLogout }) => {
   const [activeTab, setActiveTab] = useState('wod');
 
   return (
-    <div className="min-h-dvh text-white flex flex-col" style={{ backgroundColor: BG }}>
-      <header className="sticky top-0 z-10 border-b" style={{ backgroundColor: BG, borderColor: BDR }}>
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="font-black tracking-[0.3em] text-white text-lg uppercase">Kinto</h1>
-          <div className="flex items-center gap-3">
-            <a href="/" className="text-xs text-zinc-500 hover:text-white transition-colors">← Jogo</a>
-            <button
-              onClick={onLogout}
-              className="text-xs text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors border"
-              style={{ borderColor: BDR }}
-            >
-              Sair
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-dvh text-white flex" style={{ backgroundColor: BG }}>
 
-      <main className={`mx-auto w-full px-4 py-6 flex-1 pb-24 sm:pb-6 ${activeTab === 'kanban' ? 'max-w-none' : 'max-w-3xl'}`}>
-        <div className={`${activeTab === 'kanban' ? 'max-w-3xl mx-auto' : ''}`}>
-          <div
-            className={`hidden sm:flex gap-1 mb-6 rounded-xl p-1 border ${activeTab === 'kanban' ? 'w-fit mx-auto' : 'w-fit'}`}
+      {/* ── Sidebar (desktop) ── */}
+      <aside
+        className="hidden sm:flex flex-col sticky top-0 h-dvh w-56 shrink-0 border-r"
+        style={{ backgroundColor: CARD, borderColor: BDR }}
+      >
+        <div className="px-5 pt-5 pb-4 border-b" style={{ borderColor: BDR }}>
+          <h1 className="font-black tracking-[0.3em] text-white text-sm uppercase">Kinto</h1>
+          <p className="text-zinc-500 text-[11px] mt-0.5">Painel Admin</p>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
+          {tabs.map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${
+                activeTab === id
+                  ? 'bg-white/10 text-white'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Icon className="size-4 shrink-0" />
+              {label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="p-3 border-t space-y-0.5" style={{ borderColor: BDR }}>
+          <a
+            href="/"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-zinc-500 hover:text-white transition-colors"
+          >
+            <ArrowLeft className="size-4 shrink-0" />
+            Voltar ao jogo
+          </a>
+          <button
+            onClick={onLogout}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-zinc-500 hover:text-white transition-colors text-left"
+          >
+            <LogOut className="size-4 shrink-0" />
+            Sair
+          </button>
+        </div>
+      </aside>
+
+      {/* ── Área principal ── */}
+      <div className="flex-1 flex flex-col min-w-0">
+
+        {/* Mobile: header + barra de abas rolável */}
+        <div className="sm:hidden sticky top-0 z-20">
+          <header
+            className="border-b flex items-center justify-between px-4 py-3"
+            style={{ backgroundColor: BG, borderColor: BDR }}
+          >
+            <h1 className="font-black tracking-[0.3em] text-white text-sm uppercase">Kinto</h1>
+            <div className="flex items-center gap-2">
+              <a href="/" className="text-xs text-zinc-500 hover:text-white transition-colors">← Jogo</a>
+              <button
+                onClick={onLogout}
+                className="text-xs text-zinc-400 hover:text-white px-2.5 py-1 rounded-lg border transition-colors"
+                style={{ borderColor: BDR }}
+              >
+                Sair
+              </button>
+            </div>
+          </header>
+
+          <nav
+            className="border-b overflow-x-auto [&::-webkit-scrollbar]:hidden flex"
             style={{ backgroundColor: CARD, borderColor: BDR }}
           >
-            {tabs.map(tab => (
+            {tabs.map(({ id, short, Icon }) => (
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                  activeTab === tab.id ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'
+                key={id}
+                onClick={() => setActiveTab(id)}
+                className={`shrink-0 flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                  activeTab === id
+                    ? 'text-white border-white'
+                    : 'text-zinc-500 border-transparent'
                 }`}
               >
-                {tab.label}
+                <Icon className="size-3.5 shrink-0" />
+                {short}
               </button>
             ))}
-          </div>
+          </nav>
         </div>
 
-        {activeTab === 'wod' && (
-          <WordOfDayPanel
-            wordLength={5}
-            maxAttempts={6}
-            getInitialWord={() => getWordOfDay() || '—'}
-            setWordFn={setWordOfDay}
-            saveDailyWordFn={saveDailyWord}
-            getDailyResultsFn={getDailyResults}
-          />
-        )}
-        {activeTab === 'wod6' && (
-          <WordOfDayPanel
-            wordLength={6}
-            maxAttempts={7}
-            getInitialWord={() => getWordOfDay6() || '—'}
-            setWordFn={setWordOfDay6}
-            saveDailyWordFn={saveDailyWord6}
-            getDailyResultsFn={getDailyResults6}
-          />
-        )}
-        {activeTab === 'stats'   && <StatsPanel />}
-        {activeTab === 'history' && <HistoryPanel />}
-        {activeTab === 'words'   && <WordsPanel />}
-        {activeTab === 'kanban'    && <KanbanBoard />}
-        {activeTab === 'logs'      && <ActivityLog />}
-        {activeTab === 'comments'  && <CommentsPanel />}
-        {activeTab === 'usage'     && <UsagePanel />}
-        {activeTab === 'supporters' && <SupportersPanel />}
-      </main>
-
-      {/* Navegação inferior — apenas mobile */}
-      <nav
-        className="sm:hidden fixed bottom-0 inset-x-0 border-t z-20 flex"
-        style={{ backgroundColor: CARD, borderColor: BDR, paddingBottom: 'env(safe-area-inset-bottom)' }}
-      >
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 py-3 text-xs font-semibold transition-colors border-t-2 ${
-              activeTab === tab.id
-                ? 'text-white border-white'
-                : 'text-zinc-500 border-transparent'
-            }`}
-          >
-            {tab.short}
-          </button>
-        ))}
-      </nav>
+        {/* Conteúdo */}
+        <main className={`flex-1 px-4 py-6 sm:p-6 mx-auto w-full ${activeTab === 'kanban' ? 'max-w-none' : 'max-w-3xl'}`}>
+          {activeTab === 'wod' && (
+            <WordOfDayPanel
+              wordLength={5}
+              maxAttempts={6}
+              getInitialWord={() => getWordOfDay() || '—'}
+              setWordFn={setWordOfDay}
+              saveDailyWordFn={saveDailyWord}
+              getDailyResultsFn={getDailyResults}
+            />
+          )}
+          {activeTab === 'wod6' && (
+            <WordOfDayPanel
+              wordLength={6}
+              maxAttempts={7}
+              getInitialWord={() => getWordOfDay6() || '—'}
+              setWordFn={setWordOfDay6}
+              saveDailyWordFn={saveDailyWord6}
+              getDailyResultsFn={getDailyResults6}
+            />
+          )}
+          {activeTab === 'stats'      && <StatsPanel />}
+          {activeTab === 'history'    && <HistoryPanel />}
+          {activeTab === 'words'      && <WordsPanel />}
+          {activeTab === 'kanban'     && <KanbanBoard />}
+          {activeTab === 'logs'       && <ActivityLog />}
+          {activeTab === 'comments'   && <CommentsPanel />}
+          {activeTab === 'usage'      && <UsagePanel />}
+          {activeTab === 'supporters' && <SupportersPanel />}
+        </main>
+      </div>
     </div>
   );
 };
