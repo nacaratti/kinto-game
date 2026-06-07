@@ -254,8 +254,9 @@ const GameHeader = ({ allModes, currentMode, onModeChange, theme, setTheme, them
           </div>
 
           {/* Centro: título */}
-          <h1 className="text-2xl sm:text-3xl font-black tracking-[0.25em] text-white uppercase select-none">
+          <h1 className="relative text-2xl sm:text-3xl font-black tracking-[0.25em] text-white uppercase select-none">
             Kinto
+            <span className="absolute left-full top-1/2 -translate-y-1/2 ml-1.5 text-lg leading-none" aria-hidden="true">🏳️‍🌈</span>
           </h1>
 
           {/* Direita: comentários + configurações de modo */}

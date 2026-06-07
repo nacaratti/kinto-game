@@ -40,47 +40,67 @@ describe('Bandeirinhas (componente)', () => {
   });
 });
 
-describe('buildGarland (geometria do festão)', () => {
-  it('gera bandeirinhas e um path de corda', () => {
-    const g = buildGarland(1200);
-    expect(g.flags.length).toBeGreaterThan(0);
-    expect(g.cordPath.startsWith('M')).toBe(true);
+describe('buildGarland (dois drapeados ancorados)', () => {
+  it('tem exatamente 2 drapeados e 4 pontos de fixação', () => {
+    const g = buildGarland(1440);
+    expect(g.swags).toHaveLength(2);
+    expect(g.pins).toHaveLength(4);
+    // dois subpaths (um Q por drapeado)
+    expect((g.cordPath.match(/Q/g) || []).length).toBe(2);
   });
 
-  it('é simétrico em torno do centro', () => {
+  it('tem festão horizontal sobre o tabuleiro (linha reta, y=topY)', () => {
+    const g = buildGarland(1440);
+    const half = 720;
+    // bandeirinhas centrais ficam na linha horizontal (y pequeno, rente ao navbar)
+    const centro = g.flags.filter((f) => Math.abs(f.x - half) < g.boardHalf - 1);
+    expect(centro.length).toBeGreaterThan(0);
+    // todas com ângulo 0 (penduradas retas, corda horizontal)
+    centro.forEach((f) => expect(f.angle).toBe(0));
+    // todas no topo (y = topY padrão = 8)
+    centro.forEach((f) => expect(f.y).toBeLessThan(20));
+  });
+
+  it('âncoras internas ficam na margem do tabuleiro, sob o navbar (y alto)', () => {
+    const g = buildGarland(1440);
+    expect(g.innerL).toBeGreaterThan(0);
+    expect(g.innerR).toBeLessThan(1440);
+    // pinos internos no topo
+    expect(g.pins[0].y).toBeLessThan(20);
+    expect(g.pins[1].y).toBeLessThan(20);
+  });
+
+  it('no web os drapeados descem bem mais que as âncoras', () => {
+    const g = buildGarland(1440);
+    const maxY = Math.max(...g.flags.map((f) => f.y));
+    expect(maxY).toBeGreaterThan(120);
+  });
+
+  it('é simétrico: lado esquerdo espelha o direito', () => {
     const g = buildGarland(1600);
     const half = 800;
-    const left = g.flags.find((f) => Math.abs(f.x - (half - 300)) < 16);
-    const right = g.flags.find((f) => Math.abs(f.x - (half + 300)) < 16);
-    expect(left && right).toBeTruthy();
-    expect(Math.abs(left.y - right.y)).toBeLessThan(2);
+    const ys = g.flags.map((f) => ({ d: Math.round(Math.abs(f.x - half)), y: Math.round(f.y) }));
+    // para cada distância do centro à esquerda existe uma igual à direita com mesmo y
+    const left = g.flags.filter((f) => f.x < half).map((f) => Math.round(f.y)).sort();
+    const right = g.flags.filter((f) => f.x > half).map((f) => Math.round(f.y)).sort();
+    expect(left).toEqual(right);
   });
 
-  it('no web: laterais descem bem mais que o centro', () => {
-    const g = buildGarland(1600);
-    const half = 800;
-    const centro = g.flags.find((f) => Math.abs(f.x - half) < 16);
-    const borda = g.flags.reduce((a, b) => (b.x < a.x ? b : a)); // mais à esquerda
-    expect(borda.y).toBeGreaterThan(centro.y + 80);
+  it('ocupa pouco espaço no fluxo (não empurra o jogo)', () => {
+    const g = buildGarland(1440);
+    expect(g.flowHeight).toBeLessThan(60);
   });
 
-  it('zona central do jogo permanece rasa (independente da largura)', () => {
-    const wide = buildGarland(1600);
-    const narrow = buildGarland(520);
-    // profundidade do centro deve ser parecida (rasa) em ambos
-    const centroWide = wide.flags.find((f) => Math.abs(f.x - 800) < 16).y;
-    const centroNarrow = narrow.flags.find((f) => Math.abs(f.x - 260) < 16).y;
-    expect(Math.abs(centroWide - centroNarrow)).toBeLessThan(20);
-    // o fluxo ocupado (altura reservada) é raso em ambos
-    expect(wide.flowHeight).toBeLessThan(70);
-    expect(narrow.flowHeight).toBeLessThan(70);
-  });
-
-  it('no mobile (estreito) não há queda lateral', () => {
-    const g = buildGarland(400);
+  it('no mobile (estreito) vira festão raso de largura total', () => {
+    const g = buildGarland(375);
+    expect(g.swags).toHaveLength(0); // sem drapeados laterais
+    // bandeirinhas cobrem a largura toda
+    const maxX = Math.max(...g.flags.map((f) => f.x));
+    const minX = Math.min(...g.flags.map((f) => f.x));
+    expect(maxX).toBeGreaterThan(300);
+    expect(minX).toBeLessThan(40);
+    // e é raso
     const ys = g.flags.map((f) => f.y);
-    const max = Math.max(...ys);
-    const min = Math.min(...ys);
-    expect(max - min).toBeLessThan(40); // raso e uniforme
+    expect(Math.max(...ys) - Math.min(...ys)).toBeLessThan(30);
   });
 });

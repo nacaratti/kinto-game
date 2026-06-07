@@ -4,7 +4,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 describe('ErrorBoundary', () => {
   it('getDerivedStateFromError sets hasError to true', () => {
     const state = ErrorBoundary.getDerivedStateFromError(new Error('boom'));
-    expect(state).toEqual({ hasError: true });
+    expect(state).toEqual({ hasError: true, isChunkError: false });
   });
 
   it('componentDidCatch logs error and component stack to console', () => {
@@ -19,8 +19,8 @@ describe('ErrorBoundary', () => {
     consoleSpy.mockRestore();
   });
 
-  it('initializes with hasError: false', () => {
+  it('initializes com hasError e isChunkError false', () => {
     const boundary = new ErrorBoundary({});
-    expect(boundary.state).toEqual({ hasError: false });
+    expect(boundary.state).toEqual({ hasError: false, isChunkError: false });
   });
 });

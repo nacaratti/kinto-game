@@ -16,72 +16,124 @@ const FLAG_POINTS = [
   [-FLAG_W / 2, FLAG_H],
 ].map((p) => p.join(',')).join(' ');
 
-// Constrói a geometria do festão para uma dada largura (em px; 1 unidade
-// SVG = 1 px, então nada distorce). A corda é uma linha ondulada
-// (escalopes) cuja profundidade varia conforme a posição:
-//  - no centro (onde fica o jogo) os drapeados são RASOS e altos, para
-//    não atrapalhar a jogabilidade;
-//  - em direção às laterais os drapeados ficam MAIORES e a corda desce,
-//    como se estivesse presa nas bordas laterais da página.
+const qPoint = (P0, P1, P2, t) => {
+  const mt = 1 - t;
+  return {
+    x: mt * mt * P0.x + 2 * mt * t * P1.x + t * t * P2.x,
+    y: mt * mt * P0.y + 2 * mt * t * P1.y + t * t * P2.y,
+  };
+};
+const qAngle = (P0, P1, P2, t) => {
+  const dx = 2 * (1 - t) * (P1.x - P0.x) + 2 * t * (P2.x - P1.x);
+  const dy = 2 * (1 - t) * (P1.y - P0.y) + 2 * t * (P2.y - P1.y);
+  return (Math.atan2(dy, dx) * 180) / Math.PI;
+};
+
+// Festão raso de largura total (mobile/estreito): escalopes pequenos e
+// altos, ancorados nos dois cantos sob o navbar.
+function buildShallow(W, { topY = 8, spacing = 48 } = {}) {
+  const flags = [];
+  let i = 0;
+  for (let x = spacing / 2; x <= W; x += spacing) {
+    flags.push({ x: Math.min(W, x), y: topY, angle: 0, color: CORES[i++ % CORES.length] });
+  }
+  return {
+    swags: [],
+    flags,
+    pins: [{ x: 0, y: topY }, { x: W, y: topY }],
+    cordPath: `M 0 ${topY} L ${W} ${topY}`,
+    height: Math.ceil(topY + FLAG_H + 8),
+    flowHeight: Math.ceil(topY + FLAG_H + 6),
+    width: W,
+    innerL: 0,
+    innerR: W,
+    boardHalf: 0,
+  };
+}
+
+// Constrói a geometria do festão. Apenas DOIS drapeados, um de cada
+// lado do tabuleiro: cada um é "preso" logo abaixo do navbar (na margem
+// do tabuleiro) e termina preso na lateral da página. O centro, sobre o
+// tabuleiro, fica livre para não atrapalhar a jogabilidade.
 export function buildGarland(width, opts = {}) {
   const {
-    topY = 6,
-    segW = 160,      // largura de cada escalope
-    spacing = 30,    // distância horizontal entre bandeirinhas
-    gameHalf = 290,  // meia-largura da zona "protegida" do jogo
-    minSag = 14,     // profundidade do drapeado no centro
-    maxSag = 56,     // profundidade máxima nas laterais
-    maxDrop = 240,   // o quanto a corda desce nas laterais
+    topY = 8,
+    boardMargin = 250, // meia-largura da coluna do jogo (~max-w-lg)
+    spacing = 48,
   } = opts;
 
   const W = Math.max(1, width);
   const half = W / 2;
-  const sideSpace = Math.max(0, half - gameHalf);
-  const sideDrop = Math.min(sideSpace * 0.55, maxDrop);
+  // âncoras internas na margem do tabuleiro (recuam em telas estreitas)
+  const boardHalf = Math.min(boardMargin, Math.max(36, half - 36));
+  const innerL = half - boardHalf;
+  const innerR = half + boardHalf;
 
-  // 0 na zona do jogo → 1 nas bordas (com leve aceleração)
-  const ramp = (x) => {
-    if (sideSpace <= 1) return 0;
-    const d = Math.abs(x - half);
-    const r = Math.min(1, Math.max(0, (d - gameHalf) / sideSpace));
-    return Math.pow(r, 1.3);
-  };
-  const peak = (x) => topY + sideDrop * ramp(x);
-  const amp = (x) => minSag + (maxSag - minSag) * ramp(x);
-  // escalope: 0 no centro (pico sobre o jogo) e a cada segW
-  const scallop = (x) => Math.sin((Math.PI * (x - half)) / segW) ** 2;
-  const f = (x) => peak(x) + amp(x) * scallop(x);
-
-  // bandeirinhas distribuídas simetricamente a partir do centro
-  const xs = [half];
-  for (let x = half + spacing; x <= W; x += spacing) xs.push(x);
-  for (let x = half - spacing; x >= 0; x -= spacing) xs.unshift(x);
-
-  const D = 2;
-  const flags = xs.map((x, i) => {
-    const cx = Math.min(W, Math.max(0, x));
-    const y = f(cx);
-    const angle =
-      (Math.atan2(f(Math.min(W, cx + D)) - f(Math.max(0, cx - D)), 2 * D) * 180) / Math.PI;
-    return { x: cx, y, angle, color: CORES[i % CORES.length] };
-  });
-
-  // caminho da corda (amostrado finamente)
-  let cordPath = '';
-  let maxY = 0;
-  for (let x = 0; x <= W; x += 6) {
-    const y = f(x);
-    if (y > maxY) maxY = y;
-    cordPath += (x === 0 ? 'M' : ' L') + ` ${x} ${y.toFixed(1)}`;
+  // Sem espaço lateral suficiente (mobile/estreito) → festão raso de
+  // largura total, mantendo o topo sobre o jogo sem atrapalhar.
+  if (innerL < 120) {
+    return buildShallow(W, { topY, spacing });
   }
 
-  const height = Math.ceil(maxY + FLAG_H + 8);
-  // altura que o componente ocupa no fluxo: só o necessário para o
-  // drapeado raso do centro; as laterais fundas "transbordam" para baixo
-  // sem empurrar o conteúdo.
-  const flowHeight = Math.ceil(topY + minSag + FLAG_H + 8);
+  // comprimento horizontal de cada drapeado (da margem do tabuleiro até a borda)
+  const span = Math.max(1, innerL);
+  // o quanto a ponta lateral desce e o quanto a barriga do drapeado afunda
+  const sideY = Math.min(Math.max(span * 0.3, 28), 140);
+  const sag = Math.min(Math.max(span * 0.62, 48), 250);
 
-  return { flags, cordPath, height, flowHeight, width: W };
+  let colorIdx = 0;
+  const makeSwag = (P0, P2) => {
+    const P1 = { x: (P0.x + P2.x) / 2, y: (P0.y + P2.y) / 2 + sag };
+    const count = Math.max(2, Math.round(Math.abs(P2.x - P0.x) / spacing));
+    const flags = [];
+    for (let i = 0; i < count; i++) {
+      const t = (i + 0.5) / count;
+      const p = qPoint(P0, P1, P2, t);
+      const rawAngle = qAngle(P0, P1, P2, t);
+      // Normaliza para que as bandeiras sempre pendurem para baixo (gravidade).
+      // Tangentes que apontam para a esquerda (|ângulo| > 90°) seriam rotacionadas
+      // de cabeça para baixo sem essa correção.
+      const angle = rawAngle > 90 ? rawAngle - 180 : rawAngle < -90 ? rawAngle + 180 : rawAngle;
+      flags.push({ x: p.x, y: p.y, angle, color: CORES[colorIdx++ % CORES.length] });
+    }
+    const path = `M ${P0.x.toFixed(1)} ${P0.y.toFixed(1)} Q ${P1.x.toFixed(1)} ${P1.y.toFixed(1)} ${P2.x.toFixed(1)} ${P2.y.toFixed(1)}`;
+    return { P0, P1, P2, flags, path };
+  };
+
+  // esquerda: da margem esquerda do tabuleiro até a borda esquerda da página
+  const left = makeSwag({ x: innerL, y: topY }, { x: 0, y: sideY });
+  // direita: da margem direita do tabuleiro até a borda direita da página
+  const right = makeSwag({ x: innerR, y: topY }, { x: W, y: sideY });
+
+  // Festão horizontal sobre o tabuleiro, ligando os dois pontos de fixação
+  // em linha reta rente ao navbar.
+  const centerCount = Math.max(2, Math.round((innerR - innerL) / spacing));
+  const centerFlags = [];
+  for (let i = 0; i < centerCount; i++) {
+    const t = (i + 0.5) / centerCount;
+    const x = innerL + t * (innerR - innerL);
+    centerFlags.push({ x, y: topY, angle: 0, color: CORES[colorIdx++ % CORES.length] });
+  }
+  const centerPath = `M ${innerL.toFixed(1)} ${topY.toFixed(1)} L ${innerR.toFixed(1)} ${topY.toFixed(1)}`;
+
+  const swags = [left, right];
+  const flags = [...left.flags, ...right.flags, ...centerFlags];
+  // pontos de fixação (nós): margens do tabuleiro (sob o navbar) e laterais
+  const pins = [
+    { x: innerL, y: topY },
+    { x: innerR, y: topY },
+    { x: 0, y: sideY },
+    { x: W, y: sideY },
+  ];
+  const cordPath = `${left.path} ${right.path} ${centerPath}`;
+
+  const maxY = flags.reduce((m, f) => Math.max(m, f.y), 0);
+  const height = Math.ceil(maxY + FLAG_H + 8);
+  // só o necessário para a parte alta (perto das âncoras do tabuleiro); as
+  // barrigas fundas das laterais transbordam para baixo sem empurrar o jogo.
+  const flowHeight = Math.ceil(topY + FLAG_H + 6);
+
+  return { swags, flags, pins, cordPath, height, flowHeight, width: W, innerL, innerR, boardHalf };
 }
 
 // Festão decorativo de bandeirinhas de festa junina. Puramente visual:
@@ -130,10 +182,9 @@ const Bandeirinhas = () => {
             <stop offset="100%" stopColor="rgba(0,0,0,0.22)" />
           </linearGradient>
         </defs>
-        <path d={cordPath} fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2" strokeLinecap="round" />
+        <path d={cordPath} fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" />
         {flags.map((fl, i) => (
           <g key={i} transform={`translate(${fl.x.toFixed(1)} ${fl.y.toFixed(1)}) rotate(${fl.angle.toFixed(1)})`}>
-            <circle cx="0" cy="0" r="2" fill="rgba(255,255,255,0.5)" />
             <polygon points={FLAG_POINTS} fill={fl.color} />
             <polygon points={FLAG_POINTS} fill="url(#bandeiraSombra)" />
           </g>
