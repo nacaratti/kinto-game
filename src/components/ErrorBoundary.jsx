@@ -1,21 +1,58 @@
 import { Component } from 'react';
 
+function isChunkLoadError(error) {
+  return (
+    error?.message?.includes('Failed to fetch dynamically imported module') ||
+    error?.message?.includes('Loading chunk') ||
+    error?.name === 'ChunkLoadError'
+  );
+}
+
 export class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, isChunkError: false };
   }
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, isChunkError: isChunkLoadError(error) };
   }
 
   componentDidCatch(error, info) {
     console.error('[ErrorBoundary]', error, info.componentStack);
+    if (isChunkLoadError(error)) {
+      const alreadyReloaded = sessionStorage.getItem('_chunk_reload');
+      if (!alreadyReloaded) {
+        sessionStorage.setItem('_chunk_reload', '1');
+        window.location.reload();
+      }
+    }
   }
 
   render() {
     if (this.state.hasError) {
+      if (this.state.isChunkError) {
+        return (
+          <div style={{
+            minHeight: '100dvh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#16181d',
+            color: '#e2e8f0',
+            fontFamily: 'Inter, sans-serif',
+            padding: '24px',
+            textAlign: 'center',
+            gap: '16px',
+          }}>
+            <div style={{ width: 28, height: 28, borderRadius: '50%', border: '2px solid #3f4253', borderTopColor: '#fff', animation: 'spin 0.7s linear infinite' }} />
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            <p style={{ margin: 0, color: '#9ca3af', fontSize: '15px' }}>Atualizando...</p>
+          </div>
+        );
+      }
+
       return (
         <div style={{
           minHeight: '100dvh',
