@@ -47,6 +47,7 @@ const App = ({ initialMode, allModes }) => {
     isGameWon,
     isRestored,
     isLoading,
+    isTraining,
     usedLetters,
     submittedGuessesInfo,
     handleTileFocus,
@@ -54,6 +55,8 @@ const App = ({ initialMode, allModes }) => {
     handleKeyboardPress,
     setActiveInputCol,
     shakingRow,
+    startTraining,
+    exitTraining,
   } = useGameLogic(wordLength, maxGuesses, hardMode);
 
   const mainRef = useRef(null);
@@ -125,6 +128,23 @@ const App = ({ initialMode, allModes }) => {
 
       <Bandeirinhas />
 
+      {isTraining && (
+        <div className="w-full max-w-lg mx-auto px-3 pt-2">
+          <div className="flex items-center justify-between gap-2 rounded-lg border border-zinc-700 bg-zinc-800/60 px-3 py-2">
+            <p className="text-xs text-zinc-300">
+              <span className="font-semibold text-white">Modo Treino</span>
+              <span className="text-zinc-500"> — não conta para estatísticas</span>
+            </p>
+            <button
+              onClick={exitTraining}
+              className="text-xs text-zinc-400 hover:text-white transition-colors shrink-0"
+            >
+              Sair
+            </button>
+          </div>
+        </div>
+      )}
+
       <main className="flex flex-col items-center justify-between flex-1 w-full max-w-lg mx-auto px-3 pt-3 pb-2">
         <GameBoard
           currentGuess={currentGuess}
@@ -145,7 +165,31 @@ const App = ({ initialMode, allModes }) => {
             isGameOver={isGameOver}
           />
 
-          {isGameOver && !showResult && (
+          {isGameOver && isTraining && (
+            <div className="flex flex-col items-center gap-2 mt-4">
+              <p className="text-sm text-center text-zinc-300">
+                {isGameWon
+                  ? 'Acertou! 🎉'
+                  : <>A palavra era <span className="font-bold tracking-widest text-white">{solution}</span></>}
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={startTraining}
+                  className="text-xs font-bold text-black bg-white hover:bg-zinc-100 px-4 py-2 rounded-lg transition-colors"
+                >
+                  Nova palavra
+                </button>
+                <button
+                  onClick={exitTraining}
+                  className="text-xs text-zinc-500 hover:text-white border border-zinc-800 hover:border-zinc-600 px-4 py-2 rounded-lg transition-colors"
+                >
+                  Sair do treino
+                </button>
+              </div>
+            </div>
+          )}
+
+          {isGameOver && !isTraining && !showResult && (
             <div className="flex flex-col items-center gap-1.5 mt-4">
               {isRestored && (
                 <p className="text-zinc-600 text-xs text-center">
@@ -165,7 +209,7 @@ const App = ({ initialMode, allModes }) => {
 
       <GameFooter />
 
-      {isGameOver && (
+      {isGameOver && !isTraining && (
         <GameStatus
           isGameWon={isGameWon}
           solution={solution}
@@ -176,6 +220,7 @@ const App = ({ initialMode, allModes }) => {
           maxGuesses={maxGuesses}
           currentMode={currentMode}
           hardMode={hardMode}
+          onTraining={startTraining}
         />
       )}
     </div>

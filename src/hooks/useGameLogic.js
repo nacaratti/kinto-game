@@ -9,6 +9,7 @@ import { saveGameResult, saveDailyResult } from '@/lib/stats';
 import { saveDailyResult6 } from '@/lib/stats6';
 import { saveGameProgress, saveCompletedGame, getSavedGame } from '@/lib/gameState';
 import { saveGameProgress6, saveCompletedGame6, getSavedGame6 } from '@/lib/gameState6';
+import { getRandomSolution } from '@/lib/trainingWords';
 import { trackEvent } from '@/lib/analytics';
 import { importWithRetry } from '@/lib/chunkReload';
 
@@ -35,6 +36,7 @@ export const useGameLogic = (wordLength = WORD_LENGTH, maxGuesses = MAX_GUESSES,
   const [submittedGuessesInfo, setSubmittedGuessesInfo] = useState(Array(maxGuesses).fill(null));
   const [isRestored, setIsRestored] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isTraining, setIsTraining] = useState(false);
   const [shakingRow, setShakingRow] = useState(null);
   const shakeTimerRef = useRef(null);
 
@@ -136,6 +138,24 @@ export const useGameLogic = (wordLength = WORD_LENGTH, maxGuesses = MAX_GUESSES,
     };
   }, [gameDate, initializeGame]);
 
+  // Modo Treino: sorteia uma palavra aleatória e inicia uma rodada que NÃO
+  // conta para estatísticas nem persiste no localStorage. Serve tanto para
+  // entrar no modo quanto para pedir uma nova palavra (botão "Nova palavra").
+  const startTraining = useCallback(async () => {
+    setIsLoading(true);
+    const word = await getRandomSolution(wordLength);
+    setIsTraining(true);
+    applyNewSolution(word);
+    setIsLoading(false);
+    trackEvent('modo_treino_iniciado', { modo: is6 ? '6letras' : '5letras' });
+  }, [wordLength, applyNewSolution, is6]);
+
+  // Sai do treino e recarrega a palavra do dia (estado salvo, se houver).
+  const exitTraining = useCallback(() => {
+    setIsTraining(false);
+    initializeGame();
+  }, [initializeGame]);
+
   const handleTileFocus = (index) => {
     if (isGameOver || currentAttempt >= maxGuesses) return;
     setActiveInputCol(index);
@@ -182,8 +202,9 @@ export const useGameLogic = (wordLength = WORD_LENGTH, maxGuesses = MAX_GUESSES,
     // Guard contra travessia de meia-noite: se a data mudou desde o início do
     // jogo, a palavra em memória é de ontem mas estaríamos salvando como hoje.
     // Em vez disso, recarrega o jogo com a palavra correta de hoje.
+    // No Modo Treino não há palavra do dia, então o guard não se aplica.
     const nowDate = getTodayDateStr();
-    if (gameDate && nowDate !== gameDate) {
+    if (!isTraining && gameDate && nowDate !== gameDate) {
       toast({
         title: "Nova palavra disponível",
         description: "Carregando o jogo de hoje…",
@@ -212,21 +233,23 @@ export const useGameLogic = (wordLength = WORD_LENGTH, maxGuesses = MAX_GUESSES,
     if (isCorrect) {
       setIsGameOver(true);
       setIsGameWon(true);
-      if (is6) {
-        saveDailyResult6(today, solution, true, currentAttempt + 1);
-      } else {
-        saveGameResult(true, currentAttempt + 1);
-        saveDailyResult(today, solution, true, currentAttempt + 1);
+      if (!isTraining) {
+        if (is6) {
+          saveDailyResult6(today, solution, true, currentAttempt + 1);
+        } else {
+          saveGameResult(true, currentAttempt + 1);
+          saveDailyResult(today, solution, true, currentAttempt + 1);
+        }
+        saveCompletedFn({
+          dateStr: today,
+          solution,
+          guesses: newGuesses,
+          submittedGuessesInfo: newSubmittedInfo,
+          isGameWon: true,
+          currentAttempt,
+        });
+        trackEvent('jogo_concluido', { vitoria: true, tentativas: currentAttempt + 1, modo: is6 ? '6letras' : '5letras' });
       }
-      saveCompletedFn({
-        dateStr: today,
-        solution,
-        guesses: newGuesses,
-        submittedGuessesInfo: newSubmittedInfo,
-        isGameWon: true,
-        currentAttempt,
-      });
-      trackEvent('jogo_concluido', { vitoria: true, tentativas: currentAttempt + 1, modo: is6 ? '6letras' : '5letras' });
       toast({
         title: "Parabéns!",
         description: "Você acertou a palavra!",
@@ -235,21 +258,23 @@ export const useGameLogic = (wordLength = WORD_LENGTH, maxGuesses = MAX_GUESSES,
       });
     } else if (currentAttempt + 1 >= maxGuesses) {
       setIsGameOver(true);
-      if (is6) {
-        saveDailyResult6(today, solution, false, maxGuesses);
-      } else {
-        saveGameResult(false, maxGuesses);
-        saveDailyResult(today, solution, false, maxGuesses);
+      if (!isTraining) {
+        if (is6) {
+          saveDailyResult6(today, solution, false, maxGuesses);
+        } else {
+          saveGameResult(false, maxGuesses);
+          saveDailyResult(today, solution, false, maxGuesses);
+        }
+        saveCompletedFn({
+          dateStr: today,
+          solution,
+          guesses: newGuesses,
+          submittedGuessesInfo: newSubmittedInfo,
+          isGameWon: false,
+          currentAttempt,
+        });
+        trackEvent('jogo_concluido', { vitoria: false, tentativas: maxGuesses, modo: is6 ? '6letras' : '5letras' });
       }
-      saveCompletedFn({
-        dateStr: today,
-        solution,
-        guesses: newGuesses,
-        submittedGuessesInfo: newSubmittedInfo,
-        isGameWon: false,
-        currentAttempt,
-      });
-      trackEvent('jogo_concluido', { vitoria: false, tentativas: maxGuesses, modo: is6 ? '6letras' : '5letras' });
       toast({
         title: "Fim de jogo!",
         description: `A palavra era: ${solution}`,
@@ -257,13 +282,15 @@ export const useGameLogic = (wordLength = WORD_LENGTH, maxGuesses = MAX_GUESSES,
         duration: 4000,
       });
     } else {
-      saveProgressFn({
-        dateStr: today,
-        solution,
-        guesses: newGuesses,
-        submittedGuessesInfo: newSubmittedInfo,
-        currentAttempt,
-      });
+      if (!isTraining) {
+        saveProgressFn({
+          dateStr: today,
+          solution,
+          guesses: newGuesses,
+          submittedGuessesInfo: newSubmittedInfo,
+          currentAttempt,
+        });
+      }
       setCurrentAttempt(currentAttempt + 1);
       setCurrentGuess(Array(wordLength).fill(''));
       setActiveInputCol(0);
@@ -307,10 +334,13 @@ export const useGameLogic = (wordLength = WORD_LENGTH, maxGuesses = MAX_GUESSES,
     isGameWon,
     isRestored,
     isLoading,
+    isTraining,
     usedLetters,
     submittedGuessesInfo,
     shakingRow,
     initializeGame,
+    startTraining,
+    exitTraining,
     handleTileFocus,
     processGuess,
     handleKeyboardPress,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Share2, Clock, X, ChevronRight, MessageSquare, Flame, Coffee, Trophy, UserPlus } from 'lucide-react';
+import { Share2, Clock, X, ChevronRight, MessageSquare, Flame, Coffee, Trophy, UserPlus, Dumbbell } from 'lucide-react';
 import { getDailyResults } from '@/lib/stats';
 import { getDailyResults6 } from '@/lib/stats6';
 import { getTodayDateStr } from '@/lib/wordOfDay';
@@ -185,6 +185,7 @@ const GameStatus = ({
   maxGuesses = MAX_GUESSES,
   currentMode,
   hardMode = false,
+  onTraining,
 }) => {
   const [copied, setCopied] = useState(false);
   const [challengeCopied, setChallengeCopied] = useState(false);
@@ -419,6 +420,23 @@ const GameStatus = ({
               </div>
               <ChevronRight className="h-4 w-4 text-amber-500/70 group-hover:text-amber-300 transition-colors shrink-0" />
             </a>
+
+            {/* Modo Treino — palavras aleatórias, sem contar para estatísticas */}
+            {onTraining && (
+              <button
+                onClick={onTraining}
+                className="flex items-center justify-between w-full rounded-xl border border-zinc-700 bg-zinc-800/60 hover:bg-zinc-800 transition-colors px-4 py-3.5 group"
+              >
+                <div className="flex items-center gap-3">
+                  <Dumbbell className="h-5 w-5 text-zinc-400 shrink-0" />
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-white">Modo Treino</p>
+                    <p className="text-xs text-zinc-400 mt-0.5">Palavras aleatórias · sem limite diário</p>
+                  </div>
+                </div>
+                <ChevronRight className="h-4 w-4 text-zinc-500 group-hover:text-white transition-colors shrink-0" />
+              </button>
+            )}
 
             {/* Ranking */}
             {todayResults.length > 0 && (
