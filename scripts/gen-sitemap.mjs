@@ -21,26 +21,26 @@ function getBaseUrl() {
 const BASE = getBaseUrl();
 const today = new Date().toISOString().split('T')[0];
 
+// Rotas públicas do app (ver roteamento em src/main.jsx)
+const ROUTES = [
+  { path: '/', changefreq: 'daily', priority: '1.0' },
+  { path: '/6', changefreq: 'daily', priority: '0.9' },
+  { path: '/changelog', changefreq: 'weekly', priority: '0.7' },
+  { path: '/comments', changefreq: 'daily', priority: '0.6' },
+  { path: '/sobre', changefreq: 'monthly', priority: '0.5' },
+  { path: '/apoie', changefreq: 'monthly', priority: '0.5' },
+];
+
+const urls = ROUTES.map(({ path, changefreq, priority }) => `  <url>
+    <loc>${BASE}${path}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+  </url>`).join('\n');
+
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${BASE}/</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>${BASE}/6</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>${BASE}/changelog</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
+${urls}
 </urlset>
 `;
 
