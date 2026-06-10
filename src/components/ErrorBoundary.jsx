@@ -1,12 +1,5 @@
 import { Component } from 'react';
-
-function isChunkLoadError(error) {
-  return (
-    error?.message?.includes('Failed to fetch dynamically imported module') ||
-    error?.message?.includes('Loading chunk') ||
-    error?.name === 'ChunkLoadError'
-  );
-}
+import { isChunkLoadError, reloadOnce } from '@/lib/chunkReload';
 
 export class ErrorBoundary extends Component {
   constructor(props) {
@@ -21,11 +14,7 @@ export class ErrorBoundary extends Component {
   componentDidCatch(error, info) {
     console.error('[ErrorBoundary]', error, info.componentStack);
     if (isChunkLoadError(error)) {
-      const alreadyReloaded = sessionStorage.getItem('_chunk_reload');
-      if (!alreadyReloaded) {
-        sessionStorage.setItem('_chunk_reload', '1');
-        window.location.reload();
-      }
+      reloadOnce();
     }
   }
 

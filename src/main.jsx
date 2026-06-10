@@ -4,6 +4,7 @@ import App from '@/App';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { getModeByPath, GAME_MODES } from '@/config/gameModes';
 import { initErrorReporter } from '@/lib/errorReporter';
+import { importWithRetry } from '@/lib/chunkReload';
 import '@/index.css';
 
 // Captura erros de runtime do navegador e envia para o Supabase
@@ -49,11 +50,11 @@ initErrorReporter();
   document.head.appendChild(altDefault);
 })();
 
-const AdminApp = lazy(() => import('@/AdminApp'));
-const ChangelogApp = lazy(() => import('@/ChangelogApp'));
-const CommentsApp = lazy(() => import('@/CommentsApp'));
-const DonationApp = lazy(() => import('@/DonationApp'));
-const SobreApp = lazy(() => import('@/SobreApp'));
+const AdminApp = lazy(() => importWithRetry(() => import('@/AdminApp')));
+const ChangelogApp = lazy(() => importWithRetry(() => import('@/ChangelogApp')));
+const CommentsApp = lazy(() => importWithRetry(() => import('@/CommentsApp')));
+const DonationApp = lazy(() => importWithRetry(() => import('@/DonationApp')));
+const SobreApp = lazy(() => importWithRetry(() => import('@/SobreApp')));
 
 const path = window.location.pathname.replace(/\/$/, '');
 const isAdmin = path.endsWith('/admin');

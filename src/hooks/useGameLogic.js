@@ -10,11 +10,12 @@ import { saveDailyResult6 } from '@/lib/stats6';
 import { saveGameProgress, saveCompletedGame, getSavedGame } from '@/lib/gameState';
 import { saveGameProgress6, saveCompletedGame6, getSavedGame6 } from '@/lib/gameState6';
 import { trackEvent } from '@/lib/analytics';
+import { importWithRetry } from '@/lib/chunkReload';
 
 export const useGameLogic = (wordLength = WORD_LENGTH, maxGuesses = MAX_GUESSES, hardMode = false) => {
   const is6 = wordLength === 6;
   const getWordFn       = is6
-    ? () => import('@/lib/wordOfDay6').then(m => m.initWordOfDay6())
+    ? () => importWithRetry(() => import('@/lib/wordOfDay6')).then(m => m.initWordOfDay6())
     : initWordOfDay;
   const saveProgressFn  = is6 ? saveGameProgress6 : saveGameProgress;
   const saveCompletedFn = is6 ? saveCompletedGame6 : saveCompletedGame;
@@ -66,8 +67,8 @@ export const useGameLogic = (wordLength = WORD_LENGTH, maxGuesses = MAX_GUESSES,
     validateRef.current = null;
     const today = getTodayDateStr();
     const loadValidation = is6
-      ? import('@/lib/customWords6').then(m => { validateRef.current = m.isValidGuess6; })
-      : import('@/lib/customWords').then(m => { validateRef.current = m.isValidGuess; });
+      ? importWithRetry(() => import('@/lib/customWords6')).then(m => { validateRef.current = m.isValidGuess6; })
+      : importWithRetry(() => import('@/lib/customWords')).then(m => { validateRef.current = m.isValidGuess; });
     const [currentWord] = await Promise.all([getWordFn(), loadValidation]);
     setGameDate(today);
 

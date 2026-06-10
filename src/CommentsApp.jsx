@@ -1,7 +1,8 @@
 import React, { lazy, Suspense } from 'react';
 import { ArrowLeft, Loader2 } from 'lucide-react';
+import { importWithRetry } from '@/lib/chunkReload';
 
-const CommentsSection = lazy(() => import('@/components/CommentsSection'));
+const CommentsSection = lazy(() => importWithRetry(() => import('@/components/CommentsSection')));
 
 const BG = '#16181d';
 

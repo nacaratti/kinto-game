@@ -42,9 +42,10 @@ const SkeletonDoneItem = () => (
 );
 import { supabase } from '@/lib/supabase';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { importWithRetry } from '@/lib/chunkReload';
 
-const GoalSection = lazy(() => import('@/components/GoalSection'));
-const PixelAgents = lazy(() => import('@/components/PixelAgents'));
+const GoalSection = lazy(() => importWithRetry(() => import('@/components/GoalSection')));
+const PixelAgents = lazy(() => importWithRetry(() => import('@/components/PixelAgents')));
 
 const BG = '#16181d';
 const CARD_BG = '#1e2028';
