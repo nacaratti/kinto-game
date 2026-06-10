@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HelpCircle, Settings2, X, Check, ScrollText, MessageCircle, Palette, Flame } from 'lucide-react';
+import { HelpCircle, Settings2, X, Check, ScrollText, MessageCircle, Palette, Flame, Info } from 'lucide-react';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { getStats } from '@/lib/stats';
 import { getBestStreak } from '@/lib/streak';
@@ -176,11 +176,84 @@ const StatsModal = ({ onClose, streak }) => {
   );
 };
 
+const SobreModal = ({ onClose }) => {
+  const whatsappUrl = `https://wa.me/5521985822715?text=${encodeURIComponent("Olá! Quero falar com você sobre o jogo Kinto.")}`;
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <div className="absolute inset-0 bg-black/80" />
+      <motion.div
+        className="relative w-full max-w-sm bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl p-6 text-zinc-200"
+        initial={{ scale: 0.94, opacity: 0, y: 8 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.94, opacity: 0, y: 8 }}
+        transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-bold tracking-widest text-white uppercase flex items-center gap-2">
+            <Info className="w-5 h-5 text-[#6aaa64]" />
+            Sobre o Kinto
+          </h2>
+          <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors" aria-label="Fechar">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="space-y-3 text-sm text-zinc-400 leading-relaxed mb-6">
+          <p>
+            O <strong className="text-white">Kinto</strong> é um jogo de palavras diário em português, inspirado no Wordle, mas com uma grande diferença: ele é um <strong className="text-white">experimento real de desenvolvimento autônomo</strong>.
+          </p>
+          <p>
+            O jogo é mantido e evoluído por dois agentes de Inteligência Artificial colaborativos (o CEO Agent e o Dev Agent), que planejam, implementam novas funcionalidades e corrigem erros com supervisão humana mínima.
+          </p>
+          <p>
+            Desenvolvido por <strong className="text-white">Davi Pontes Nacaratti</strong>. Quer dar um feedback, sugerir ideias ou saber mais sobre o projeto? Entre em contato!
+          </p>
+          <div className="border-t border-zinc-800 pt-3 mt-3">
+            <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-2">Contatos</p>
+            <p className="text-xs text-zinc-400">
+              E-mail: <a href="mailto:davinacaratti@gmail.com" className="text-white hover:underline">davinacaratti@gmail.com</a>
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full bg-[#25D366] hover:bg-[#20ba56] text-black font-bold py-3 rounded-xl transition-colors text-sm text-center flex items-center justify-center gap-2"
+          >
+            <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.488 1.449 5.407 1.451 5.517.002 10.003-4.484 10.006-10.007.002-2.675-1.039-5.19-2.928-7.081-1.89-1.89-4.405-2.93-7.084-2.931-5.52 0-10.005 4.485-10.008 10.009-.001 1.92.501 3.793 1.453 5.4l-.993 3.626 3.71-.973zm11.758-5.321c-.328-.164-1.944-.96-2.242-1.068-.298-.108-.515-.164-.73.164-.216.329-.838 1.068-1.026 1.284-.188.217-.377.243-.705.079-.328-.164-1.386-.511-2.641-1.63-1.002-.894-1.678-2.001-1.875-2.33-.197-.329-.021-.508.143-.671.148-.147.328-.385.493-.578.164-.193.219-.329.329-.548.11-.219.055-.412-.028-.577-.082-.164-.73-1.758-1.001-2.411-.264-.635-.533-.55-.73-.55-.188-.009-.404-.01-.62-.01-.216 0-.569.082-.867.411-.298.329-1.139 1.115-1.139 2.72 0 1.605 1.168 3.155 1.328 3.372.162.217 2.298 3.51 5.568 4.921.777.336 1.384.537 1.857.687.781.249 1.492.214 2.054.13.627-.094 1.944-.795 2.216-1.564.272-.769.272-1.428.19-1.563-.081-.135-.298-.217-.626-.381z"/>
+            </svg>
+            Falar no WhatsApp
+          </a>
+          <button
+            onClick={onClose}
+            className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 rounded-xl transition-colors text-sm"
+          >
+            Voltar ao jogo
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
 const _TUTORIAL_KEY = '_kw';
 
 const GameHeader = ({ allModes, currentMode, onModeChange, theme, setTheme, themes, hardMode, setHardMode, streak = 0 }) => {
   const [showInfo, setShowInfo] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [showSobre, setShowSobre] = useState(false);
 
   useEffect(() => {
     try {
@@ -360,7 +433,7 @@ const GameHeader = ({ allModes, currentMode, onModeChange, theme, setTheme, them
                       <button
                         role="menuitem"
                         onClick={() => setHardMode(!hardMode)}
-                        className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors rounded-b-xl ${
+                        className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${
                           hardMode ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:bg-zinc-800/70 hover:text-white'
                         }`}
                       >
@@ -375,6 +448,21 @@ const GameHeader = ({ allModes, currentMode, onModeChange, theme, setTheme, them
                       </button>
                     </>
                   )}
+                  <div className="border-t border-zinc-800 mt-1" />
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      setShowSobre(true);
+                      setShowModes(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-4 py-3 text-left transition-colors rounded-b-xl text-zinc-400 hover:bg-zinc-800/70 hover:text-white"
+                  >
+                    <Info className="w-4 h-4 flex-shrink-0 text-[#6aaa64]" />
+                    <span className="flex flex-col">
+                      <span className="font-semibold text-sm">Sobre o Kinto</span>
+                      <span className="text-xs text-zinc-500 mt-0.5">O experimento e contatos</span>
+                    </span>
+                  </button>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -487,6 +575,22 @@ const GameHeader = ({ allModes, currentMode, onModeChange, theme, setTheme, them
                   </button>
                 </>
               )}
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-600 px-6 pt-4 pb-1 flex items-center gap-1.5">
+                <Info className="w-3 h-3" /> Ajuda & Info
+              </p>
+              <button
+                role="menuitem"
+                onClick={() => {
+                  setShowSobre(true);
+                  setShowModes(false);
+                }}
+                className="w-full flex items-center justify-between px-6 py-4 text-left border-t border-zinc-800 transition-colors active:bg-zinc-800 text-zinc-400"
+              >
+                <span className="flex flex-col">
+                  <span className="font-semibold text-base">Sobre o Kinto</span>
+                  <span className="text-sm text-zinc-500 mt-0.5">Conheça o experimento e contatos</span>
+                </span>
+              </button>
               <div className="pb-8" />
             </motion.div>
           </motion.div>
@@ -510,6 +614,13 @@ const GameHeader = ({ allModes, currentMode, onModeChange, theme, setTheme, them
       <AnimatePresence>
         {showStats && (
           <StatsModal onClose={() => setShowStats(false)} streak={streak} />
+        )}
+      </AnimatePresence>
+
+      {/* Modal Sobre */}
+      <AnimatePresence>
+        {showSobre && (
+          <SobreModal onClose={() => setShowSobre(false)} />
         )}
       </AnimatePresence>
     </>
