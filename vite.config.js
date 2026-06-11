@@ -239,6 +239,15 @@ export default defineConfig(({ mode }) => {
 		test: {
 			environment: 'jsdom',
 			globals: true,
+			// Windows + OneDrive: criar um fork novo por arquivo de teste é lento
+			// (hidratação de arquivos + spawn de processo) e estourava o timeout
+			// interno do pool ("Timeout waiting for worker to respond"). Rodar
+			// todos os arquivos num único fork persistente elimina os respawns,
+			// os timeouts de worker e o setup repetido do ambiente jsdom.
+			pool: 'forks',
+			poolOptions: {
+				forks: { singleFork: true },
+			},
 			// e2e/ é Playwright (test:e2e) — Vitest NÃO deve pegar; .claude/ tem worktrees com testes duplicados
 			exclude: ['node_modules', 'dist', 'e2e', '**/.git/**', '**/playwright-report/**', '.claude/**'],
 		},
