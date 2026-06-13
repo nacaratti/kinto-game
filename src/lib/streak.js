@@ -20,6 +20,17 @@ export const getBestStreak = () => {
   try { return Number(localStorage.getItem(BEST_STREAK_KEY) || 0); } catch { return 0; }
 };
 
+// A partir de quantos dias consecutivos o jogador é considerado veterano.
+export const VETERAN_STREAK = 20;
+
+/**
+ * Veterano = núcleo fiel. Verdadeiro quando o streak atual OU o recorde
+ * histórico alcançou o limiar — assim quem já foi veterano mantém o
+ * reconhecimento mesmo após perder a sequência.
+ */
+export const isVeteran = (streak = 0, bestStreak = 0) =>
+  Math.max(streak, bestStreak) >= VETERAN_STREAK;
+
 /**
  * Retorna o histórico pessoal dos últimos `days` dias para o modo especificado.
  * Lê apenas o localStorage — sem chamadas ao Supabase.

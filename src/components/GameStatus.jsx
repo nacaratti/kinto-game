@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Share2, Clock, X, ChevronRight, MessageSquare, Flame, Coffee } from 'lucide-react';
+import { Share2, Clock, X, ChevronRight, MessageSquare, Flame, Coffee, Trophy } from 'lucide-react';
 import { getDailyResults } from '@/lib/stats';
 import { getDailyResults6 } from '@/lib/stats6';
 import { getTodayDateStr } from '@/lib/wordOfDay';
-import { getStreak, getBestStreak, getPersonalHistory, DAILY_KEY_5, DAILY_KEY_6 } from '@/lib/streak';
+import { getStreak, getBestStreak, getPersonalHistory, isVeteran, DAILY_KEY_5, DAILY_KEY_6 } from '@/lib/streak';
 import { buildShareText } from '@/lib/shareText';
 import { GAME_MODES } from '@/config/gameModes';
 import { MAX_GUESSES } from '@/config/constants';
@@ -322,6 +322,23 @@ const GameStatus = ({
                   {bestStreak > streak && (
                     <p className="text-[10px] theme-text-present opacity-60 mt-0.5">Recorde: {bestStreak} dias</p>
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* Badge Veterano — núcleo fiel (streak atual ou recorde ≥ 20 dias).
+                Visual dourado distinto do badge verde de streak. */}
+            {isVeteran(streak, bestStreak) && (
+              <div
+                className="flex items-center justify-center gap-2 rounded-xl border py-2.5 px-4"
+                style={{ backgroundColor: 'rgba(245,197,24,0.10)', borderColor: 'rgba(245,197,24,0.35)' }}
+              >
+                <Trophy className="h-5 w-5 shrink-0" style={{ color: '#f5c518' }} />
+                <div className="text-center">
+                  <p className="text-sm font-bold" style={{ color: '#f5c518' }}>Jogador Veterano</p>
+                  <p className="text-[10px] mt-0.5" style={{ color: '#f5c518', opacity: 0.7 }}>
+                    {Math.max(streak, bestStreak)} dias de dedicação ao Kinto
+                  </p>
                 </div>
               </div>
             )}
