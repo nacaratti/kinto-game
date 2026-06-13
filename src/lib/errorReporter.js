@@ -52,12 +52,23 @@ export function isExtensionError(source, stack) {
   return EXTENSION_URL_PATTERNS.some(p => haystack.includes(p));
 }
 
+// Só reportamos erros de builds de produção reais. No servidor de
+// desenvolvimento (Vite), erros transitórios de HMR enquanto se edita
+// um arquivo — ex.: "buildShallow is not defined" durante uma troca a
+// quente — chegavam ao listener e geravam cards de bug falsos. O dev
+// já vê esses erros no console/overlay; não há por que enviá-los ao
+// banco de monitoramento de produção.
+export function isReportableEnv() {
+  return Boolean(import.meta.env.PROD);
+}
+
 let sentCount = 0;
 const seenMessages = new Set();
 
 async function report(message, stack, source) {
   if (!supabase) return;
   if (!message) return;
+  if (!isReportableEnv()) return;
   if (isBenign(message)) return;
   if (isExtensionError(source, stack)) return;
   if (sentCount >= MAX_PER_SESSION) return;

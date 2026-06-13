@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 const { mockInsert, mockFrom } = vi.hoisted(() => {
   const mockInsert = vi.fn().mockResolvedValue({ error: null });
@@ -10,11 +10,17 @@ vi.mock('@/lib/supabase', () => ({
   supabase: { from: mockFrom },
 }));
 
-import { isBenign, isExtensionError, initErrorReporter } from './errorReporter';
+import { isBenign, isExtensionError, isReportableEnv, initErrorReporter } from './errorReporter';
 
 beforeEach(() => {
   mockInsert.mockClear();
   mockFrom.mockClear();
+  // Por padrão, simula produção para exercitar o caminho de report().
+  vi.stubEnv('PROD', true);
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
 });
 
 // ─── isBenign ────────────────────────────────────────────────────────────────
@@ -74,6 +80,20 @@ describe('isExtensionError', () => {
   });
 });
 
+// ─── isReportableEnv ─────────────────────────────────────────────────────────
+
+describe('isReportableEnv', () => {
+  it('is true in a production build', () => {
+    vi.stubEnv('PROD', true);
+    expect(isReportableEnv()).toBe(true);
+  });
+
+  it('is false on the dev server (HMR noise must not be reported)', () => {
+    vi.stubEnv('PROD', false);
+    expect(isReportableEnv()).toBe(false);
+  });
+});
+
 // ─── initErrorReporter — filtro de erros benignos ────────────────────────────
 
 describe('initErrorReporter (unhandledrejection filter)', () => {
@@ -108,6 +128,37 @@ describe('initErrorReporter (unhandledrejection filter)', () => {
       message: 'Uncaught ReferenceError: hasSeenWelcome is not defined',
       filename: 'chrome-extension://abcdefghijklmnop/content.js',
       error: new Error('hasSeenWelcome is not defined'),
+    });
+    window.dispatchEvent(event);
+
+    await new Promise(r => setTimeout(r, 10));
+
+    expect(mockInsert).not.toHaveBeenCalled();
+  });
+
+  it('reports a genuine application error in production', async () => {
+    initErrorReporter();
+
+    const event = new ErrorEvent('error', {
+      message: 'TypeError: cannot read foo of undefined (prod path)',
+      filename: 'https://kinto.fun/assets/index-abc.js',
+      error: new Error('cannot read foo of undefined'),
+    });
+    window.dispatchEvent(event);
+
+    await new Promise(r => setTimeout(r, 10));
+
+    expect(mockInsert).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not report dev-server HMR errors (e.g. buildShallow not defined)', async () => {
+    vi.stubEnv('PROD', false); // simula o dev server (Vite)
+    initErrorReporter();
+
+    const event = new ErrorEvent('error', {
+      message: 'Uncaught ReferenceError: buildShallow is not defined',
+      filename: 'http://localhost:5173/src/components/Bandeirinhas.jsx?t=123',
+      error: new Error('buildShallow is not defined'),
     });
     window.dispatchEvent(event);
 
