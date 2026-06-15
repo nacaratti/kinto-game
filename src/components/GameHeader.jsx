@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HelpCircle, Settings2, X, Check, ScrollText, MessageCircle, Palette, Flame, Info } from 'lucide-react';
+import { HelpCircle, Settings2, X, Check, ScrollText, MessageCircle, Palette, Flame, Info, Coffee } from 'lucide-react';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { getStats } from '@/lib/stats';
 import { getBestStreak } from '@/lib/streak';
@@ -455,7 +455,7 @@ const GameHeader = ({ allModes, currentMode, onModeChange, theme, setTheme, them
                       setShowSobre(true);
                       setShowModes(false);
                     }}
-                    className="w-full flex items-center gap-2.5 px-4 py-3 text-left transition-colors rounded-b-xl text-zinc-400 hover:bg-zinc-800/70 hover:text-white"
+                    className="w-full flex items-center gap-2.5 px-4 py-3 text-left transition-colors text-zinc-400 hover:bg-zinc-800/70 hover:text-white"
                   >
                     <Info className="w-4 h-4 flex-shrink-0 text-[#6aaa64]" />
                     <span className="flex flex-col">
@@ -463,6 +463,17 @@ const GameHeader = ({ allModes, currentMode, onModeChange, theme, setTheme, them
                       <span className="text-xs text-zinc-500 mt-0.5">O experimento e contatos</span>
                     </span>
                   </button>
+                  <a
+                    href="/apoie"
+                    role="menuitem"
+                    className="w-full flex items-center gap-2.5 px-4 py-3 text-left transition-colors rounded-b-xl text-zinc-400 hover:bg-zinc-800/70 hover:text-white"
+                  >
+                    <Coffee className="w-4 h-4 flex-shrink-0 text-amber-400" />
+                    <span className="flex flex-col">
+                      <span className="font-semibold text-sm">Apoiar o Kinto</span>
+                      <span className="text-xs text-zinc-500 mt-0.5">Contribua com um cafézinho via Pix</span>
+                    </span>
+                  </a>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -591,6 +602,17 @@ const GameHeader = ({ allModes, currentMode, onModeChange, theme, setTheme, them
                   <span className="text-sm text-zinc-500 mt-0.5">Conheça o experimento e contatos</span>
                 </span>
               </button>
+              <a
+                href="/apoie"
+                role="menuitem"
+                className="w-full flex items-center gap-3 px-6 py-4 text-left border-t border-zinc-800 transition-colors active:bg-zinc-800 text-zinc-400"
+              >
+                <Coffee className="w-5 h-5 flex-shrink-0 text-amber-400" />
+                <span className="flex flex-col">
+                  <span className="font-semibold text-base">Apoiar o Kinto</span>
+                  <span className="text-sm text-zinc-500 mt-0.5">Contribua com um cafézinho via Pix</span>
+                </span>
+              </a>
               <div className="pb-8" />
             </motion.div>
           </motion.div>

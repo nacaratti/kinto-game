@@ -367,6 +367,21 @@ const GameStatus = ({
               </a>
             ))}
 
+            {/* Apoiar o Kinto */}
+            <a
+              href="/apoie"
+              className="flex items-center justify-between w-full rounded-xl border border-amber-800/40 bg-amber-900/15 hover:bg-amber-900/30 transition-colors px-4 py-3.5 group"
+            >
+              <div className="flex items-center gap-3">
+                <Coffee className="h-5 w-5 text-amber-400 shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-white">Apoiar o Kinto</p>
+                  <p className="text-xs text-zinc-400 mt-0.5">Ajude o experimento com um cafézinho via Pix</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-amber-500/70 group-hover:text-amber-300 transition-colors shrink-0" />
+            </a>
+
             {/* Ranking */}
             {todayResults.length > 0 && (
               <div>
