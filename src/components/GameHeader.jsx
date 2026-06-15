@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HelpCircle, Settings2, X, Check, ScrollText, MessageCircle, Palette, Flame, Info, Coffee } from 'lucide-react';
+import { HelpCircle, Settings2, X, Check, ScrollText, MessageCircle, Palette, Flame, Info, Coffee, Contrast } from 'lucide-react';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { getStats } from '@/lib/stats';
 import { getBestStreak } from '@/lib/streak';
@@ -250,7 +250,7 @@ const SobreModal = ({ onClose }) => {
 
 const _TUTORIAL_KEY = '_kw';
 
-const GameHeader = ({ allModes, currentMode, onModeChange, theme, setTheme, themes, hardMode, setHardMode, streak = 0 }) => {
+const GameHeader = ({ allModes, currentMode, onModeChange, theme, setTheme, themes, hardMode, setHardMode, highContrast, setHighContrast, streak = 0 }) => {
   const [showInfo, setShowInfo] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showSobre, setShowSobre] = useState(false);
@@ -448,6 +448,24 @@ const GameHeader = ({ allModes, currentMode, onModeChange, theme, setTheme, them
                       </button>
                     </>
                   )}
+                  {setHighContrast && (
+                    <button
+                      role="menuitem"
+                      onClick={() => setHighContrast(!highContrast)}
+                      className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${
+                        highContrast ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:bg-zinc-800/70 hover:text-white'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2.5">
+                        <Contrast className="w-4 h-4 flex-shrink-0" />
+                        <span className="flex flex-col">
+                          <span className="font-semibold text-sm">Alto contraste</span>
+                          <span className="text-xs text-zinc-500 mt-0.5">Cores para daltonismo</span>
+                        </span>
+                      </span>
+                      {highContrast && <Check className="w-4 h-4 text-[#6aaa64] ml-4 flex-shrink-0" />}
+                    </button>
+                  )}
                   <div className="border-t border-zinc-800 mt-1" />
                   <button
                     role="menuitem"
@@ -583,6 +601,26 @@ const GameHeader = ({ allModes, currentMode, onModeChange, theme, setTheme, them
                       <span className="text-sm text-zinc-500 mt-0.5">Use as dicas reveladas</span>
                     </span>
                     {hardMode && <Check className="w-5 h-5 text-[#6aaa64]" />}
+                  </button>
+                </>
+              )}
+              {setHighContrast && (
+                <>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-600 px-6 pt-4 pb-1 flex items-center gap-1.5">
+                    <Contrast className="w-3 h-3" /> Acessibilidade
+                  </p>
+                  <button
+                    role="menuitem"
+                    onClick={() => setHighContrast(!highContrast)}
+                    className={`w-full flex items-center justify-between px-6 py-4 text-left border-t border-zinc-800 transition-colors active:bg-zinc-800 ${
+                      highContrast ? 'bg-zinc-800/60 text-white' : 'text-zinc-400'
+                    }`}
+                  >
+                    <span className="flex flex-col">
+                      <span className="font-semibold text-base">Alto contraste</span>
+                      <span className="text-sm text-zinc-500 mt-0.5">Cores para daltonismo</span>
+                    </span>
+                    {highContrast && <Check className="w-5 h-5 text-[#6aaa64]" />}
                   </button>
                 </>
               )}
