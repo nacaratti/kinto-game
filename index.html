@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#16181d" />
-    <meta name="description" content="Adivinhe a palavra oculta em 6 tentativas. Wordle em português — modo de 5 e 6 letras." />
+    <meta name="description" content="Jogue Kinto, o Wordle em português: adivinhe a palavra do dia em 6 tentativas, com modos de 5 e 6 letras. Grátis, sem instalar, novo desafio todo dia." />
     <link rel="manifest" href="/manifest.json" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/icon-192.png" />
@@ -45,24 +45,45 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Kinto",
-      "url": "https://kinto.fun",
-      "description": "Adivinhe a palavra oculta em 6 tentativas. Wordle em português com modos de 5 e 6 letras.",
-      "applicationCategory": "GameApplication",
-      "operatingSystem": "Web",
-      "browserRequirements": "Requires JavaScript",
-      "inLanguage": "pt-BR",
-      "isAccessibleForFree": true,
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "BRL"
-      },
-      "author": {
-        "@type": "Organization",
-        "name": "Kinto"
-      }
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://kinto.fun/#website",
+          "name": "Kinto",
+          "alternateName": "Kinto — Wordle em Português",
+          "url": "https://kinto.fun",
+          "description": "Jogue o Wordle em português: adivinhe a palavra do dia em 6 tentativas, com modos de 5 e 6 letras.",
+          "inLanguage": "pt-BR",
+          "publisher": { "@id": "https://kinto.fun/#organization" }
+        },
+        {
+          "@type": "VideoGame",
+          "@id": "https://kinto.fun/#game",
+          "name": "Kinto",
+          "url": "https://kinto.fun",
+          "description": "Jogo de adivinhação de palavras em português inspirado no Wordle. Descubra a palavra oculta em 6 tentativas, com modos de 5 e 6 letras e um novo desafio todos os dias.",
+          "genre": "Jogo de palavras",
+          "gamePlatform": "Web",
+          "applicationCategory": "GameApplication",
+          "operatingSystem": "Web",
+          "browserRequirements": "Requires JavaScript",
+          "inLanguage": "pt-BR",
+          "isAccessibleForFree": true,
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "BRL"
+          },
+          "author": { "@id": "https://kinto.fun/#organization" },
+          "publisher": { "@id": "https://kinto.fun/#organization" }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://kinto.fun/#organization",
+          "name": "Kinto",
+          "url": "https://kinto.fun"
+        }
+      ]
     }
     </script>
 
