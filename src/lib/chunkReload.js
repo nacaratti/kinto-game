@@ -19,6 +19,12 @@ export function isChunkLoadError(error) {
     msg.includes('error loading dynamically imported module') ||
     msg.includes('Loading chunk') ||
     msg.includes('Importing a module script failed') ||
+    // Safari/WebKit: quando o servidor devolve o HTML do 404 no lugar do chunk
+    // (deploy novo, chunk com hash antigo sumiu), o módulo é rejeitado com
+    // "'text/html' is not a valid JavaScript MIME type".
+    msg.includes('is not a valid JavaScript MIME type') ||
+    // Chrome com checagem estrita de MIME para módulos.
+    msg.includes('Expected a JavaScript module script but the server responded with a MIME type') ||
     error?.name === 'ChunkLoadError'
   );
 }
