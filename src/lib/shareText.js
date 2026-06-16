@@ -2,6 +2,25 @@
  * Gera o texto de compartilhamento do resultado do jogo.
  * Função pura — sem efeitos colaterais, fácil de testar.
  */
+export const buildChallengeText = ({
+  currentAttempt,
+  maxGuesses,
+  submittedGuessesInfo,
+  currentMode,
+}) => {
+  const attempt = currentAttempt + 1;
+  const rows = (submittedGuessesInfo || [])
+    .filter(Boolean)
+    .map(row =>
+      row.map(({ status }) =>
+        status === 'correct' ? '🟢' : status === 'present' ? '🟡' : '⚫'
+      ).join('')
+    )
+    .join('\n');
+  const gameUrl = `https://kinto.fun${currentMode.path === '/' ? '' : currentMode.path}`;
+  return `Acertei o Kinto em ${attempt}/${maxGuesses}! Você consegue bater? 🎯\n\n${rows}\n\n${gameUrl}`;
+};
+
 export const buildShareText = ({
   isGameWon,
   currentAttempt,

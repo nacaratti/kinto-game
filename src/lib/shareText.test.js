@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildShareText } from './shareText.js';
+import { buildShareText, buildChallengeText } from './shareText.js';
 
 const MODE_5 = { id: 'classic', label: '5 letras', path: '/' };
 const MODE_6 = { id: 'challenge', label: '6 letras', path: '/6' };
@@ -108,5 +108,43 @@ describe('buildShareText', () => {
       hardMode: false, today: '2026-06-03', streak: 0,
     });
     expect(text).toContain('2026-06-03');
+  });
+});
+
+describe('buildChallengeText', () => {
+  it('inclui resultado e convite', () => {
+    const text = buildChallengeText({
+      currentAttempt: 2, maxGuesses: 6,
+      submittedGuessesInfo: [], currentMode: MODE_5,
+    });
+    expect(text).toContain('3/6');
+    expect(text).toContain('kinto.fun');
+  });
+
+  it('inclui URL de 6 letras quando modo 6', () => {
+    const text = buildChallengeText({
+      currentAttempt: 3, maxGuesses: 7,
+      submittedGuessesInfo: [], currentMode: MODE_6,
+    });
+    expect(text).toContain('kinto.fun/6');
+  });
+
+  it('inclui emoji de desafio', () => {
+    const text = buildChallengeText({
+      currentAttempt: 0, maxGuesses: 6,
+      submittedGuessesInfo: [], currentMode: MODE_5,
+    });
+    expect(text).toContain('🎯');
+  });
+
+  it('inclui emojis da grade de tentativas', () => {
+    const guesses = [
+      guessRow(['correct', 'present', 'absent', 'correct', 'correct']),
+    ];
+    const text = buildChallengeText({
+      currentAttempt: 0, maxGuesses: 6,
+      submittedGuessesInfo: guesses, currentMode: MODE_5,
+    });
+    expect(text).toContain('🟢🟡⚫🟢🟢');
   });
 });

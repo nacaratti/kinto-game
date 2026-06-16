@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Share2, Clock, X, ChevronRight, MessageSquare, Flame, Coffee, Trophy } from 'lucide-react';
+import { Share2, Clock, X, ChevronRight, MessageSquare, Flame, Coffee, Trophy, UserPlus } from 'lucide-react';
 import { getDailyResults } from '@/lib/stats';
 import { getDailyResults6 } from '@/lib/stats6';
 import { getTodayDateStr } from '@/lib/wordOfDay';
 import { getStreak, getBestStreak, getPersonalHistory, isVeteran, DAILY_KEY_5, DAILY_KEY_6 } from '@/lib/streak';
-import { buildShareText } from '@/lib/shareText';
+import { buildShareText, buildChallengeText } from '@/lib/shareText';
 import { GAME_MODES } from '@/config/gameModes';
 import { MAX_GUESSES } from '@/config/constants';
 import { submitComment, hasSubmittedComment } from '@/lib/comments';
@@ -187,6 +187,7 @@ const GameStatus = ({
   hardMode = false,
 }) => {
   const [copied, setCopied] = useState(false);
+  const [challengeCopied, setChallengeCopied] = useState(false);
   const [todayResults, setTodayResults] = useState([]);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
@@ -238,6 +239,32 @@ const GameStatus = ({
     }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleChallenge = async () => {
+    const text = buildChallengeText({ currentAttempt, maxGuesses, submittedGuessesInfo, currentMode });
+    if (navigator.share) {
+      try {
+        await navigator.share({ text });
+        return;
+      } catch {
+        // user cancelled or not supported — fall through to clipboard
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const el = document.createElement('textarea');
+      el.value = text;
+      el.style.position = 'fixed';
+      el.style.opacity = '0';
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+    }
+    setChallengeCopied(true);
+    setTimeout(() => setChallengeCopied(false), 2000);
   };
 
   const distribution = {};
@@ -344,13 +371,24 @@ const GameStatus = ({
             )}
 
             {/* Share */}
-            <button
-              onClick={handleShare}
-              className="w-full flex items-center justify-center gap-2 bg-white hover:bg-zinc-100 text-black font-bold py-3 rounded-xl transition-colors text-sm"
-            >
-              <Share2 className="h-4 w-4" />
-              {copied ? 'Copiado!' : 'Compartilhar'}
-            </button>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handleShare}
+                className="w-full flex items-center justify-center gap-2 bg-white hover:bg-zinc-100 text-black font-bold py-3 rounded-xl transition-colors text-sm"
+              >
+                <Share2 className="h-4 w-4" />
+                {copied ? 'Copiado!' : 'Compartilhar'}
+              </button>
+              {isGameWon && (
+                <button
+                  onClick={handleChallenge}
+                  className="w-full flex items-center justify-center gap-2 border border-emerald-700/60 bg-emerald-900/20 hover:bg-emerald-900/40 text-emerald-300 font-semibold py-3 rounded-xl transition-colors text-sm"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  {challengeCopied ? 'Link copiado!' : 'Desafiar um amigo'}
+                </button>
+              )}
+            </div>
 
             {/* Other modes */}
             {otherModes.map((mode) => (
