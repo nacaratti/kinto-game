@@ -71,6 +71,20 @@ const AdminFallback = () => (
   </div>
 );
 
+// Quando o jogador está na home (/ clássico), pré-busca os chunks de /6
+// em idle para que a navegação seja imediata caso ele queira tentar o desafio.
+if (initialMode.id === 'classic' && !isAdmin && !isChangelog && !isComments && !isDonation && !isSobre) {
+  const prefetch6 = () => {
+    import('@/lib/customWords6');
+    import('@/lib/wordOfDay6');
+  };
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(prefetch6, { timeout: 5000 });
+  } else {
+    setTimeout(prefetch6, 3000);
+  }
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
