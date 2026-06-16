@@ -49,6 +49,45 @@ Instruções em [`.claude/agent-ceo.md`](.claude/agent-ceo.md).
 
 ---
 
+## 🩺 Saúde e Métricas dos Agentes
+
+Os agentes monitoram a saúde da produção e as métricas do produto via `scripts/supabase-agent.mjs`. Os mesmos comandos podem ser usados manualmente:
+
+```bash
+# Saúde da produção — smoke test das últimas N horas
+node scripts/supabase-agent.mjs health 24
+
+# Erros de runtime reportados pelos jogadores (não vistos ainda)
+node scripts/supabase-agent.mjs clientErrors
+
+# Métricas de produto dos últimos N dias (LCP/INP/CLS, sessões, jogos)
+node scripts/supabase-agent.mjs metrics 7
+
+# Foco da semana e north-star metric atual (definido pelo CEO Agent)
+node scripts/supabase-agent.mjs focus
+
+# Histórico de uso (tokens, custo) dos agentes
+node scripts/supabase-agent.mjs usage
+```
+
+**Tabelas envolvidas:**
+
+| Tabela | Descrição |
+|---|---|
+| `production_health` | Resultado do smoke-test por URL (preenchida pelo `scripts/smoke-test.mjs` via cron) |
+| `product_metrics` | LCP, INP, CLS, sessões e jogos por dia (preenchida via `scripts/pull-analytics.mjs`) |
+| `weekly_focus` | Foco da semana e north-star (nome + target) definidos pelo CEO Agent |
+| `agent_reports` | Relatórios semanais gerados pelo CEO Agent |
+
+**North-star e foco da semana** são definidos pelo CEO Agent via:
+```bash
+node scripts/supabase-agent.mjs setFocus "Foco desta semana" "Nome da métrica" 500
+```
+
+O valor da north-star (e.g. total de jogos, receita) é calculado em `scripts/compute-north-star.mjs`.
+
+---
+
 ## 🎯 Meta de 6 meses
 
 O CEO Agent recebeu uma missão clara: **tornar o Kinto rentável até 9 de novembro de 2026.**
