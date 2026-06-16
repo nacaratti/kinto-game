@@ -27,59 +27,9 @@ import { getAllSupporters, moderateSupporter, updateSupporterBadge } from '@/lib
 import KanbanBoard from '@/components/admin/KanbanBoard';
 import ActivityLog from '@/components/admin/ActivityLog';
 import UsagePanel from '@/components/admin/UsagePanel';
+import { BG, CARD, SURF, BDR, BDR2, Card, SectionTitle, Input, BtnPrimary, BtnGhost } from '@/components/admin/ui';
 
 const PAGE_SIZE = 50;
-
-const BG   = '#16181d';
-const CARD = '#1e2028';
-const SURF = '#22252f';
-const BDR  = '#2c2f3a';
-const BDR2 = '#363a47';
-
-// ─── Primitivos de UI ─────────────────────────────────────────────────────────
-const Card = ({ children, className = '' }) => (
-  <div
-    className={`rounded-xl p-4 sm:p-5 border ${className}`}
-    style={{ backgroundColor: CARD, borderColor: BDR }}
-  >
-    {children}
-  </div>
-);
-
-const SectionTitle = ({ children }) => (
-  <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-4">{children}</p>
-);
-
-const Input = ({ className = '', ...props }) => (
-  <input
-    className={`rounded-lg px-4 py-2.5 text-white outline-none transition-colors placeholder:text-zinc-600 border ${className}`}
-    style={{ backgroundColor: SURF, borderColor: BDR2 }}
-    onFocus={e => (e.target.style.borderColor = '#7a7d8e')}
-    onBlur={e  => (e.target.style.borderColor = BDR2)}
-    {...props}
-  />
-);
-
-const BtnPrimary = ({ children, className = '', ...props }) => (
-  <button
-    className={`bg-white hover:bg-zinc-100 text-black font-bold rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${className}`}
-    {...props}
-  >
-    {children}
-  </button>
-);
-
-const BtnGhost = ({ children, className = '', ...props }) => (
-  <button
-    className={`text-zinc-400 hover:text-white rounded-lg transition-colors text-sm border ${className}`}
-    style={{ borderColor: BDR2 }}
-    onMouseEnter={e => (e.currentTarget.style.borderColor = '#4a4d5e')}
-    onMouseLeave={e => (e.currentTarget.style.borderColor = BDR2)}
-    {...props}
-  >
-    {children}
-  </button>
-);
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 const LoginScreen = ({ onLogin }) => {

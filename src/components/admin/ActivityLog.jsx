@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-
-const CARD_BG = '#1e2028';
-const SURF = '#22252f';
-const BDR = '#2c2f3a';
+import { CARD as CARD_BG, SURF, BDR } from './ui';
 
 const ACTION_LABELS = {
   card_started: { label: 'Iniciou tarefa', color: 'text-[#c9a84c]' },

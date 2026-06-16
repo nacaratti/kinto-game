@@ -3,11 +3,7 @@ import { Plus, Trash2, ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
 import { supabase } from '@/lib/supabase';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import CardForm from './CardForm';
-
-const CARD_BG = '#1e2028';
-const SURF = '#22252f';
-const BDR = '#2c2f3a';
-const BDR2 = '#363a47';
+import { CARD as CARD_BG, SURF, BDR, BDR2 } from './ui';
 
 const COLUMNS = [
   { id: 'backlog',     label: 'Backlog',     color: '#6b7280' },

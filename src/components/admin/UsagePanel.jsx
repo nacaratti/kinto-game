@@ -1,10 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Bot, Brain, AlertCircle, DollarSign } from 'lucide-react';
-
-const CARD = '#1e2028';
-const SURF = '#22252f';
-const BDR  = '#2c2f3a';
+import { CARD, SURF, BDR } from './ui';
 
 const AGENT_META = {
   dev_agent: { label: 'Dev Agent', icon: Bot, color: 'text-blue-400 bg-blue-500/10' },

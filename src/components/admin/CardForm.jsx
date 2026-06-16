@@ -1,9 +1,5 @@
 import React, { useState } from 'react';
-
-const SURF = '#22252f';
-const BDR2 = '#363a47';
-const CARD_BG = '#1e2028';
-const BDR = '#2c2f3a';
+import { CARD as CARD_BG, SURF, BDR, BDR2 } from './ui';
 
 const PRIORITY_OPTIONS = [
   { value: 0, label: 'Baixa', color: 'text-zinc-400' },
