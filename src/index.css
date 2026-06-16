@@ -197,6 +197,13 @@
   outline: none;
 }
 
+/* Anel de foco visível para navegação por teclado (não aparece em cliques de mouse) */
+.keyboard-key:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+  z-index: 1;
+}
+
 .keyboard-key:active:not(:disabled) {
   opacity: 0.75;
   transform: scale(0.96);
@@ -204,7 +211,8 @@
 
 .key-default { background: var(--color-key-default-bg); color: var(--color-key-default-text); }
 .key-correct { background: var(--color-correct);        color: #fff; }
-.key-present { background: var(--color-present);        color: #fff; }
+/* Texto escuro na tecla presente: --color-present é amarelo/âmbar — contraste insuficiente com #fff */
+.key-present { background: var(--color-present);        color: #1a0f00; }
 .key-absent  { background: var(--color-key-absent-bg);  color: var(--color-key-absent-text); cursor: not-allowed; opacity: 0.8; }
 
 /* ─── Confetti ───────────────────────────────────────────────────────────────── */
