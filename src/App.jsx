@@ -12,10 +12,12 @@ import { getStreak } from '@/lib/streak';
 import Confetti from '@/components/Confetti';
 import Bandeirinhas from '@/components/Bandeirinhas';
 import { useHardMode } from '@/hooks/useHardMode';
+import { useHighContrast } from '@/hooks/useHighContrast';
 
 const App = ({ initialMode, allModes }) => {
   const { theme, setTheme, themes } = useTheme();
   const { hardMode, setHardMode } = useHardMode();
+  const { highContrast, setHighContrast } = useHighContrast();
   const [currentMode, setCurrentMode] = useState(initialMode);
   const [streak] = useState(() => getStreak());
   const [showConfetti, setShowConfetti] = useState(false);
@@ -116,6 +118,8 @@ const App = ({ initialMode, allModes }) => {
         themes={themes}
         hardMode={hardMode}
         setHardMode={setHardMode}
+        highContrast={highContrast}
+        setHighContrast={setHighContrast}
         streak={streak}
       />
 

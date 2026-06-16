@@ -11,6 +11,13 @@ describe('isChunkLoadError', () => {
     expect(isChunkLoadError(new Error('Importing a module script failed.'))).toBe(true);
   });
 
+  it('detecta erro de MIME type quando o servidor devolve HTML no lugar do chunk', () => {
+    // Safari/WebKit após deploy novo com chunk antigo ausente
+    expect(isChunkLoadError(new Error("'text/html' is not a valid JavaScript MIME type."))).toBe(true);
+    // Chrome com checagem estrita de MIME para módulos
+    expect(isChunkLoadError(new Error('Expected a JavaScript module script but the server responded with a MIME type of "text/html".'))).toBe(true);
+  });
+
   it('reconhece erro pelo name ChunkLoadError', () => {
     const err = new Error('boom');
     err.name = 'ChunkLoadError';

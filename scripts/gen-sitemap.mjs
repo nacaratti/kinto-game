@@ -15,7 +15,7 @@ function getBaseUrl() {
     const match = env.match(/^VITE_PUBLIC_URL=(.+)$/m);
     if (match) return match[1].trim().replace(/\/$/, '');
   } catch {}
-  return 'https://example.com'; // fallback
+  return 'https://kinto.fun'; // fallback — domínio de produção
 }
 
 const BASE = getBaseUrl();

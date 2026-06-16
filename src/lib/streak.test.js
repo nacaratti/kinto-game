@@ -3,6 +3,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 let getStreak;
 let getBestStreak;
 let getPersonalHistory;
+let isVeteran;
+let VETERAN_STREAK;
 
 const encode = (obj) => btoa(JSON.stringify(obj));
 
@@ -18,6 +20,29 @@ beforeEach(async () => {
   getStreak = mod.getStreak;
   getBestStreak = mod.getBestStreak;
   getPersonalHistory = mod.getPersonalHistory;
+  isVeteran = mod.isVeteran;
+  VETERAN_STREAK = mod.VETERAN_STREAK;
+});
+
+describe('isVeteran', () => {
+  it('é falso abaixo do limiar (streak e recorde)', () => {
+    expect(isVeteran(0, 0)).toBe(false);
+    expect(isVeteran(19, 19)).toBe(false);
+  });
+
+  it('é verdadeiro quando o streak atual atinge o limiar', () => {
+    expect(isVeteran(VETERAN_STREAK, 0)).toBe(true);
+    expect(isVeteran(25, 5)).toBe(true);
+  });
+
+  it('é verdadeiro quando o recorde atingiu o limiar, mesmo com streak atual baixo', () => {
+    expect(isVeteran(1, VETERAN_STREAK)).toBe(true);
+    expect(isVeteran(0, 40)).toBe(true);
+  });
+
+  it('lida com argumentos ausentes sem quebrar', () => {
+    expect(isVeteran()).toBe(false);
+  });
 });
 
 describe('getStreak', () => {

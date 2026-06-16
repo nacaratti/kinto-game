@@ -105,6 +105,14 @@
   }
 }
 
+  /* Alto contraste (daltonismo): azul/laranja em vez de verde/amarelo.
+     Aplicado sobre qualquer tema — vem depois das definições de tema e
+     usa o mesmo nível de especificidade, então sobrescreve as cores. */
+  [data-contrast="high"] {
+    --color-correct: #1d6fe0;
+    --color-present: #e08600;
+  }
+
 @layer base {
   * {
     @apply border-border box-border;

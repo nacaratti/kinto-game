@@ -111,6 +111,26 @@ export const getGlobalStats = async () => {
 };
 
 /**
+ * Conta o total de partidas já jogadas — soma das duas tabelas de
+ * resultados (5 e 6 letras). Usa count exato com head: true, então não
+ * traz nenhuma linha: é uma query barata e não expõe dado individual
+ * de ninguém. Retorna 0 se não houver Supabase ou em caso de erro, para
+ * o componente poder simplesmente não exibir o contador.
+ */
+export const getTotalGamesPlayed = async () => {
+  if (!supabase) return 0;
+  try {
+    const [r5, r6] = await Promise.all([
+      supabase.from('daily_results').select('*', { count: 'exact', head: true }),
+      supabase.from('daily_results_6').select('*', { count: 'exact', head: true }),
+    ]);
+    return (r5.count || 0) + (r6.count || 0);
+  } catch {
+    return 0;
+  }
+};
+
+/**
  * Salva a palavra do dia na tabela daily_words (upsert).
  */
 export const saveDailyWord = async (dateStr, word) => {

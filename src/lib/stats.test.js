@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 // Supabase will be null in test env (no env vars), but mock it explicitly for safety
 vi.mock('@/lib/supabase', () => ({ supabase: null }));
 
-import { getStats, saveGameResult, resetStats } from './stats';
+import { getStats, saveGameResult, resetStats, getTotalGamesPlayed } from './stats';
 
 beforeEach(() => {
   localStorage.clear();
@@ -92,5 +92,13 @@ describe('resetStats', () => {
     expect(stats.wins).toBe(0);
     expect(stats.losses).toBe(0);
     expect(stats.totalAttempts).toBe(0);
+  });
+});
+
+// ─── getTotalGamesPlayed ────────────────────────────────────────────────────
+
+describe('getTotalGamesPlayed', () => {
+  it('returns 0 gracefully when Supabase is unavailable', async () => {
+    await expect(getTotalGamesPlayed()).resolves.toBe(0);
   });
 });

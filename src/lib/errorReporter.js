@@ -22,6 +22,10 @@ const IGNORED_PATTERNS = [
   // quando outra aba assume o lock, este erro é lançado — é esperado.
   'lock was stolen',
   'lock request aborted',
+  // Erro cross-origin mascarado: scripts de terceiros sem CORS
+  // chegam ao window.onerror apenas como "Script error." sem stack
+  // útil. Não é bug da aplicação e não há o que investigar.
+  'script error.',
 ];
 
 export function isBenign(message) {
@@ -29,13 +33,44 @@ export function isBenign(message) {
   return IGNORED_PATTERNS.some(p => lower.includes(p));
 }
 
+// URLs de extensões de navegador (e userscripts). Erros originados
+// em content scripts injetados na página — ex.: "hasSeenWelcome is
+// not defined" — não são bugs do Kinto, mas chegam ao listener
+// global de erro e poluíam o monitoramento gerando cards falsos.
+// Mesma estratégia do `denyUrls` do Sentry.
+const EXTENSION_URL_PATTERNS = [
+  'chrome-extension://',
+  'moz-extension://',
+  'safari-web-extension://',
+  'safari-extension://',
+  'webkit-masked-url://',
+  'ms-browser-extension://',
+];
+
+export function isExtensionError(source, stack) {
+  const haystack = `${source || ''} ${stack || ''}`.toLowerCase();
+  return EXTENSION_URL_PATTERNS.some(p => haystack.includes(p));
+}
+
+// Só reportamos erros de builds de produção reais. No servidor de
+// desenvolvimento (Vite), erros transitórios de HMR enquanto se edita
+// um arquivo — ex.: "buildShallow is not defined" durante uma troca a
+// quente — chegavam ao listener e geravam cards de bug falsos. O dev
+// já vê esses erros no console/overlay; não há por que enviá-los ao
+// banco de monitoramento de produção.
+export function isReportableEnv() {
+  return Boolean(import.meta.env.PROD);
+}
+
 let sentCount = 0;
 const seenMessages = new Set();
 
-async function report(message, stack) {
+async function report(message, stack, source) {
   if (!supabase) return;
   if (!message) return;
+  if (!isReportableEnv()) return;
   if (isBenign(message)) return;
+  if (isExtensionError(source, stack)) return;
   if (sentCount >= MAX_PER_SESSION) return;
 
   // Dedupe: mesma mensagem só é enviada uma vez por sessão
@@ -65,8 +100,9 @@ export function initErrorReporter() {
   installed = true;
 
   window.addEventListener('error', (event) => {
-    // event.error tem stack; event.message é o texto
-    report(event.message || event.error?.message, event.error?.stack);
+    // event.error tem stack; event.message é o texto;
+    // event.filename indica o arquivo de origem (ex.: extensão).
+    report(event.message || event.error?.message, event.error?.stack, event.filename);
   });
 
   window.addEventListener('unhandledrejection', (event) => {

@@ -1,5 +1,6 @@
-import React from 'react';
-import { ArrowLeft, Bot, Brain, GitMerge, Zap, BookOpen, Heart } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Bot, Brain, GitMerge, Zap, BookOpen, Heart, Gamepad2 } from 'lucide-react';
+import { getTotalGamesPlayed } from '@/lib/stats';
 import '@/index.css';
 
 const BG = '#16181d';
@@ -42,7 +43,20 @@ const AgentCard = ({ name, role, description, color }) => (
   </div>
 );
 
-const SobreApp = () => (
+const SobreApp = () => {
+  // Prova social: total de partidas já jogadas (5 + 6 letras).
+  // Busca a cada visita; null enquanto carrega para não exibir "0".
+  const [totalGames, setTotalGames] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    getTotalGamesPlayed().then((n) => {
+      if (active) setTotalGames(n);
+    });
+    return () => { active = false; };
+  }, []);
+
+  return (
   <div
     className="min-h-dvh flex flex-col"
     style={{ backgroundColor: BG, color: '#e8eaf0', fontFamily: 'Inter, sans-serif' }}
@@ -79,6 +93,19 @@ const SobreApp = () => (
           O Kinto é um Wordle em Português — e um experimento real: ele é desenvolvido e
           mantido por agentes de inteligência artificial autônomos.
         </p>
+
+        {totalGames > 0 && (
+          <div
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full mt-1"
+            style={{ backgroundColor: '#6aaa6418', border: '1px solid #6aaa6430' }}
+          >
+            <Gamepad2 className="w-4 h-4 shrink-0" style={{ color: '#6aaa64' }} />
+            <span className="text-sm text-zinc-300">
+              <strong className="font-bold text-white">{totalGames.toLocaleString('pt-BR')}</strong>
+              {' '}partidas já jogadas
+            </span>
+          </div>
+        )}
       </div>
 
       {/* O experimento */}
@@ -176,6 +203,7 @@ const SobreApp = () => (
       </p>
     </main>
   </div>
-);
+  );
+};
 
 export default SobreApp;
