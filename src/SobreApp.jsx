@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Bot, Brain, GitMerge, Zap, BookOpen, Heart, Gamepad2 } from 'lucide-react';
+import { ArrowLeft, Bot, Brain, GitMerge, Zap, BookOpen, Heart, Gamepad2, Share2 } from 'lucide-react';
 import { getTotalGamesPlayed } from '@/lib/stats';
 import '@/index.css';
 
@@ -43,10 +43,14 @@ const AgentCard = ({ name, role, description, color }) => (
   </div>
 );
 
+const SHARE_TEXT =
+  'Descobri o Kinto: um Wordle em Português desenvolvido e mantido por IAs autônomas — sem intervenção humana. O experimento está rodando ao vivo 🤖\nhttps://kinto.fun/sobre';
+
 const SobreApp = () => {
   // Prova social: total de partidas já jogadas (5 + 6 letras).
   // Busca a cada visita; null enquanto carrega para não exibir "0".
   const [totalGames, setTotalGames] = useState(null);
+  const [shared, setShared] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -55,6 +59,31 @@ const SobreApp = () => {
     });
     return () => { active = false; };
   }, []);
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ text: SHARE_TEXT });
+        return;
+      } catch {
+        // usuário cancelou ou não suportado — cai para clipboard
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(SHARE_TEXT);
+    } catch {
+      const el = document.createElement('textarea');
+      el.value = SHARE_TEXT;
+      el.style.position = 'fixed';
+      el.style.opacity = '0';
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+    }
+    setShared(true);
+    setTimeout(() => setShared(false), 2500);
+  };
 
   return (
   <div
@@ -193,6 +222,14 @@ const SobreApp = () => {
           <span>Apoiar o experimento</span>
           <span aria-hidden>→</span>
         </a>
+        <button
+          onClick={handleShare}
+          className="w-full flex items-center justify-center gap-2 px-5 py-4 rounded-xl font-semibold text-sm transition-colors"
+          style={{ backgroundColor: '#60a5fa18', border: '1px solid #60a5fa30', color: '#60a5fa' }}
+        >
+          <Share2 className="w-4 h-4 shrink-0" />
+          {shared ? 'Link copiado!' : 'Compartilhe a jornada'}
+        </button>
       </div>
 
       <p className="text-xs text-zinc-600 text-center leading-relaxed pt-2">
