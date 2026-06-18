@@ -29,3 +29,25 @@ if not %EXIT_CODE%==0 (
   echo Erro detectado, enviando alerta Telegram...
   node scripts/notify-failure.mjs dev_agent %EXIT_CODE%
 )
+
+REM ============================================================
+REM Deploy automatico: roda os testes e, se passarem, empurra a
+REM main. A Vercel publica em producao no push para a main.
+REM (Experimento: aceitamos bugs ocasionais; os testes sao a rede.)
+REM ============================================================
+echo [%date% %time%] Rodando testes antes do deploy...
+set NODE_OPTIONS=--max-old-space-size=4096
+call npm test
+if %errorlevel%==0 (
+  echo [%date% %time%] Testes OK - empurrando para a main...
+  git push origin main
+  if %errorlevel%==0 (
+    echo [%date% %time%] Push concluido - deploy automatico na Vercel
+  ) else (
+    echo [%date% %time%] Falha no git push para a main
+    node scripts/notify-failure.mjs dev_agent push_failed
+  )
+) else (
+  echo [%date% %time%] Testes falharam - deploy cancelado, nada empurrado
+  node scripts/notify-failure.mjs dev_agent test_failed
+)

@@ -72,6 +72,17 @@ Não saia do escopo do card atual para fazer isso — apenas registre o card par
 - Logue o fim: `node scripts/supabase-agent.mjs log dev_agent session_ended '{"cards_completed": <N>}'`
 - Se o tempo permite mais um card pequeno **de hoje ou backlog**, pegue. Se não, encerre
 - **NUNCA avance para cards de dias futuros** para "adiantar trabalho"
+- **Trabalhe sempre na branch `main`** e garanta que todo trabalho do dia está
+  **commitado** nela antes de encerrar. Não deixe trabalho em branches paralelas
+  (foi assim que o "Modo Treino" ficou órfão e nunca chegou em produção).
+
+### 6. Deploy (automático no fim da sessão)
+- Ao final, o `scripts/run-dev-agent.bat` roda `npm test` e, **se passar**, faz
+  `git push origin main`. A Vercel publica em produção automaticamente no push.
+- Ou seja: **commitar na `main` = publicar**. Por isso `npm test` precisa estar
+  verde antes de cada commit (já é regra) — testes vermelhos cancelam o deploy.
+- Se precisar empurrar manualmente durante a sessão: `git push origin main`.
+- Continua **proibido** `git push --force`.
 
 ## Regras
 
