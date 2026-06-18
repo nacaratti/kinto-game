@@ -6,6 +6,7 @@ import { getDailyResults6 } from '@/lib/stats6';
 import { getTodayDateStr } from '@/lib/wordOfDay';
 import { getStreak, getBestStreak, getPersonalHistory, isVeteran, DAILY_KEY_5, DAILY_KEY_6 } from '@/lib/streak';
 import { buildShareText, buildChallengeText } from '@/lib/shareText';
+import { toast } from '@/components/ui/use-toast';
 import { GAME_MODES } from '@/config/gameModes';
 import { MAX_GUESSES } from '@/config/constants';
 import { submitComment, hasSubmittedComment } from '@/lib/comments';
@@ -240,6 +241,7 @@ const GameStatus = ({
     }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    toast({ title: 'Copiado!', duration: 2000 });
   };
 
   const handleChallenge = async () => {
@@ -266,6 +268,7 @@ const GameStatus = ({
     }
     setChallengeCopied(true);
     setTimeout(() => setChallengeCopied(false), 2000);
+    toast({ title: 'Link copiado!', duration: 2000 });
   };
 
   const distribution = {};
