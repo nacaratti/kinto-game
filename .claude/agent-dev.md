@@ -16,10 +16,9 @@ Quando implementar qualquer card, sempre pense: "isso poderia ser mais seguro/r�
 
 ### 1. Início da Sessão
 - Logue o início: `node scripts/supabase-agent.mjs log dev_agent session_started '{"duration_minutes": <TEMPO>}'`
-- **Verifique a saúde da produção primeiro** (sensores determinísticos):
-  - `node scripts/supabase-agent.mjs health 24` — checks do smoke test nas últimas 24h. Se houver `ok: false`, o site está com problema.
+- **Verifique a saúde da produção primeiro**:
   - `node scripts/supabase-agent.mjs clientErrors` — erros de runtime reportados pelos jogadores ainda não vistos.
-  - Se os sensores criaram cards `internal`+`bug` (do `smoke_test` ou `error_monitor`), **eles têm prioridade** — pegue esses antes de qualquer card de feature.
+  - Se o sensor `error_monitor` criou cards `internal`+`bug`, **eles têm prioridade** — pegue esses antes de qualquer card de feature.
 - **Contexto de performance** (opcional, útil para cards de otimização):
   - `node scripts/supabase-agent.mjs metrics 7` — métricas de produto da semana (LCP/INP/CLS, sessões). Se LCP > 2500ms ou INP > 200ms, priorize cards `performance` que afetam essas métricas.
 - Verifique status do projeto local:
