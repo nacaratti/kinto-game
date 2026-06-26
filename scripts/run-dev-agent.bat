@@ -28,12 +28,16 @@ node scripts/record-usage.mjs dev_agent "%OUTFILE%" %EXIT_CODE%
 if not %EXIT_CODE%==0 (
   echo Erro detectado, enviando alerta Telegram...
   node scripts/notify-failure.mjs dev_agent %EXIT_CODE%
+  echo [%date% %time%] Agente falhou ^(possivel erro de autenticacao 401^) - deploy CANCELADO.
+  echo Refaca o login do Claude Code ^(claude /login^) para o agente voltar a rodar.
+  exit /b %EXIT_CODE%
 )
 
 REM ============================================================
-REM Deploy automatico: roda os testes e, se passarem, empurra a
-REM main. A Vercel publica em producao no push para a main.
-REM (Experimento: aceitamos bugs ocasionais; os testes sao a rede.)
+REM Deploy automatico (somente quando o agente rodou com sucesso):
+REM roda os testes e, se passarem, empurra a main. A Vercel publica
+REM em producao no push. (Experimento: aceitamos bugs ocasionais;
+REM os testes sao a rede.)
 REM ============================================================
 echo [%date% %time%] Rodando testes antes do deploy...
 set NODE_OPTIONS=--max-old-space-size=4096
