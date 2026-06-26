@@ -47,3 +47,24 @@ export const buildShareText = ({
   const gameUrl = `https://kinto.fun${currentMode.path === '/' ? '' : currentMode.path}`;
   return `Kinto${modeLabel}${hardSuffix} ${today} ${result}${streakSuffix}\n\n${rows}\n\n${gameUrl}`;
 };
+
+/**
+ * Monta a URL de compartilhamento de cada rede social.
+ * - x / whatsapp: levam o texto do resultado.
+ * - linkedin: usa share-offsite (só aceita a URL; o texto vem das
+ *   meta tags Open Graph da página do experimento).
+ */
+export const buildSocialShareUrl = (network, { text = '', url = 'https://kinto.fun' } = {}) => {
+  const t = encodeURIComponent(text);
+  const u = encodeURIComponent(url);
+  switch (network) {
+    case 'x':
+      return `https://twitter.com/intent/tweet?text=${t}`;
+    case 'whatsapp':
+      return `https://wa.me/?text=${t}`;
+    case 'linkedin':
+      return `https://www.linkedin.com/sharing/share-offsite/?url=${u}`;
+    default:
+      return url;
+  }
+};

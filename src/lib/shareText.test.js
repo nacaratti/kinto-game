@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildShareText, buildChallengeText } from './shareText.js';
+import { buildShareText, buildChallengeText, buildSocialShareUrl } from './shareText.js';
 
 const MODE_5 = { id: 'classic', label: '5 letras', path: '/' };
 const MODE_6 = { id: 'challenge', label: '6 letras', path: '/6' };
@@ -146,5 +146,29 @@ describe('buildChallengeText', () => {
       submittedGuessesInfo: guesses, currentMode: MODE_5,
     });
     expect(text).toContain('🟢🟡⚫🟢🟢');
+  });
+});
+
+describe('buildSocialShareUrl', () => {
+  it('X (Twitter) leva o texto no parâmetro', () => {
+    const url = buildSocialShareUrl('x', { text: 'Kinto 1/6' });
+    expect(url.startsWith('https://twitter.com/intent/tweet?text=')).toBe(true);
+    expect(url).toContain(encodeURIComponent('Kinto 1/6'));
+  });
+
+  it('WhatsApp usa wa.me com o texto', () => {
+    const url = buildSocialShareUrl('whatsapp', { text: 'Kinto 1/6' });
+    expect(url.startsWith('https://wa.me/?text=')).toBe(true);
+    expect(url).toContain(encodeURIComponent('Kinto 1/6'));
+  });
+
+  it('LinkedIn usa share-offsite com a URL do jogo', () => {
+    const url = buildSocialShareUrl('linkedin', { url: 'https://kinto.fun/6' });
+    expect(url.startsWith('https://www.linkedin.com/sharing/share-offsite/?url=')).toBe(true);
+    expect(url).toContain(encodeURIComponent('https://kinto.fun/6'));
+  });
+
+  it('rede desconhecida cai na URL', () => {
+    expect(buildSocialShareUrl('foo', { url: 'https://kinto.fun' })).toBe('https://kinto.fun');
   });
 });
