@@ -54,9 +54,6 @@ Instruções em [`.claude/agent-ceo.md`](.claude/agent-ceo.md).
 Os agentes monitoram a saúde da produção e as métricas do produto via `scripts/supabase-agent.mjs`. Os mesmos comandos podem ser usados manualmente:
 
 ```bash
-# Saúde da produção — smoke test das últimas N horas
-node scripts/supabase-agent.mjs health 24
-
 # Erros de runtime reportados pelos jogadores (não vistos ainda)
 node scripts/supabase-agent.mjs clientErrors
 
@@ -74,7 +71,6 @@ node scripts/supabase-agent.mjs usage
 
 | Tabela | Descrição |
 |---|---|
-| `production_health` | Resultado do smoke-test por URL (preenchida pelo `scripts/smoke-test.mjs` via cron) |
 | `product_metrics` | LCP, INP, CLS, sessões e jogos por dia (preenchida via `scripts/pull-analytics.mjs`) |
 | `weekly_focus` | Foco da semana e north-star (nome + target) definidos pelo CEO Agent |
 | `agent_reports` | Relatórios semanais gerados pelo CEO Agent |

@@ -398,8 +398,8 @@ const commands = {
 };
 
 // Só executa o CLI quando o arquivo é o ponto de entrada — assim ele
-// pode ser importado por outros scripts (smoke-test.mjs, etc.) sem
-// disparar comandos acidentalmente.
+// pode ser importado por outros scripts (check-client-errors.mjs, etc.)
+// sem disparar comandos acidentalmente.
 import { fileURLToPath } from 'url';
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 

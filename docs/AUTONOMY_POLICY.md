@@ -53,8 +53,8 @@ categoria sensível, ele deve adicionar o label antes de pular.
 - Modificar `.claude/settings.local.json` (permissões automáticas)
 - Modificar `scripts/setup-tasks.ps1` ou os `.bat` (mudaria como os agentes rodam)
 - Adicionar/remover tasks no Windows Task Scheduler
-- Mexer em `scripts/agent-watchdog.mjs`, `scripts/notify-failure.mjs`,
-  `scripts/record-usage.mjs` (a infra de monitoramento dos agentes)
+- Mexer em `scripts/notify-failure.mjs`, `scripts/record-usage.mjs`
+  (a infra de monitoramento dos agentes)
 
 ### Operações externas
 - Contratar serviços pagos

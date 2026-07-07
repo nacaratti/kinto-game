@@ -73,7 +73,7 @@ async function main() {
 
   if (exitCode === 0 && failures.length === 0) {
     console.log('[e2e] Tudo OK.');
-    // Loga sucesso para o watchdog poder confirmar que rodou
+    // Loga sucesso em activity_logs (histórico de execução do E2E)
     try {
       await logActivity({
         agent: 'e2e_monitor',

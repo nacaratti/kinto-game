@@ -4,8 +4,6 @@
 // card de bug por grupo relevante. Detalhe técnico (stack) vai
 // só em activity_logs, nunca no card público.
 //
-// Roda junto do smoke test (run-smoke-test.bat) ou standalone.
-//
 // Uso manual: node scripts/check-client-errors.mjs
 // ============================================================
 import {
