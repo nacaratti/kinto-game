@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Bot, Brain, GitMerge, Zap, BookOpen, Heart, Gamepad2, Share2 } from 'lucide-react';
+import { ArrowLeft, Bot, Brain, GitMerge, Zap, BookOpen, Heart, Gamepad2, Share2, HelpCircle, ChevronDown } from 'lucide-react';
 import { getTotalGamesPlayed } from '@/lib/stats';
 import '@/index.css';
 
@@ -42,6 +42,25 @@ const AgentCard = ({ name, role, description, color }) => (
     <p className="text-xs text-zinc-500 leading-relaxed">{description}</p>
   </div>
 );
+
+const FaqItem = ({ question, children }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: '#22252f', borderColor: BDR }}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left"
+      >
+        <span className="text-sm font-semibold text-white">{question}</span>
+        <ChevronDown className={`w-4 h-4 text-zinc-500 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="px-4 pb-3 -mt-1 text-xs text-zinc-400 leading-relaxed space-y-2">{children}</div>
+      )}
+    </div>
+  );
+};
 
 const SHARE_TEXT =
   'Descobri o Kinto: um Wordle em Português desenvolvido e mantido por IAs autônomas — sem intervenção humana. O experimento está rodando ao vivo 🤖\nhttps://kinto.fun/sobre';
@@ -202,6 +221,47 @@ const SobreApp = () => {
         <p>
           O experimento está em andamento. Os resultados aparecem no próprio produto.
         </p>
+      </Section>
+
+      {/* Perguntas frequentes */}
+      <Section icon={HelpCircle} iconColor="#f472b6" title="Perguntas frequentes">
+        <div className="flex flex-col gap-2">
+          <FaqItem question="As IAs realmente fazem tudo sozinhas?">
+            <p>
+              No dia a dia, sim. Os agentes planejam, priorizam, escrevem o código, rodam os
+              testes e fazem o deploy. O humano por trás cuida da visão geral e da
+              infraestrutura, mas não codifica as funcionalidades.
+            </p>
+          </FaqItem>
+          <FaqItem question="Preciso criar conta para jogar?">
+            <p>
+              Não. É só abrir e jogar. Seu progresso e estatísticas ficam salvos apenas no seu
+              próprio navegador.
+            </p>
+          </FaqItem>
+          <FaqItem question="Posso jogar mais de uma vez por dia?">
+            <p>
+              A palavra do dia é uma só, igual para todo mundo. Mas existe o{' '}
+              <strong className="text-zinc-300">Modo Treino</strong>: palavras aleatórias, sem
+              limite, que não contam para as estatísticas. Ele aparece na tela de fim de jogo.
+            </p>
+          </FaqItem>
+          <FaqItem question="Como as palavras são escolhidas?">
+            <p>
+              De uma lista curada de palavras comuns do português. Nomes próprios e sobrenomes
+              não entram no sorteio. Há dois modos: 5 e 6 letras.
+            </p>
+          </FaqItem>
+          <FaqItem question="Como acompanho o que os agentes fizeram?">
+            <p>
+              Cada funcionalidade e correção fica registrada na{' '}
+              <a href="/changelog" className="font-semibold underline underline-offset-2" style={{ color: '#6aaa64' }}>
+                página de evolução
+              </a>
+              , em ordem cronológica.
+            </p>
+          </FaqItem>
+        </div>
       </Section>
 
       {/* CTA links */}
